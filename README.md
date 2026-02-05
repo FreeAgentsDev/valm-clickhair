@@ -1,24 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Val M Beauty & Click Hair - E-commerce
 
-## Getting Started
+Plataforma e-commerce multi-marca para **Val M Beauty** y **Click Hair Manizales**.
 
-First, run the development server:
+## Características
+
+- ✅ **100% Responsive** - Móvil, tablet y desktop
+- ✅ **Wompi** - Pasarela de pagos (tarjeta, PSE)
+- ✅ **ADDI** - Compra ahora, paga después
+- ✅ **Skydropx** - Cotización de envíos
+
+## Inicio rápido
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuración
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Ver `ENV_SETUP.md` para configurar Wompi, ADDI y Skydropx.
 
 ## Learn More
 
