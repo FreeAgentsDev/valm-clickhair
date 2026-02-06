@@ -23,9 +23,11 @@ interface BrandPageProps {
 
 function BrandInfoSection({
   brandInfo,
+  otherBrand,
   isValm,
 }: {
   brandInfo: (typeof BRANDS)[BrandSlug];
+  otherBrand: (typeof BRANDS)[BrandSlug];
   isValm: boolean;
 }) {
   const whatsappNumber = brandInfo.whatsapp ?? WHATSAPP_NUMBERS[0].number;
@@ -198,6 +200,16 @@ function BrandInfoSection({
               @{brandInfo.instagram}
             </a>
             <a
+              href={otherBrand.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: otherBrand.primaryColor }}
+            >
+              <Instagram size={18} aria-hidden />
+              @{otherBrand.instagram}
+            </a>
+            <a
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -273,7 +285,11 @@ export default async function BrandPage({ params }: BrandPageProps) {
 
         {/* Info de la tienda */}
         <div className="mb-12">
-          <BrandInfoSection brandInfo={brandInfo} isValm={isValm} />
+          <BrandInfoSection
+            brandInfo={brandInfo}
+            otherBrand={BRANDS[isValm ? "click-hair" : "valm-beauty"]}
+            isValm={isValm}
+          />
         </div>
 
         {/* Productos */}
