@@ -6,10 +6,12 @@ export default function CartPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Carrito</h1>
-        <p className="text-sm text-gray-500 mb-8">
-          Envía tu carrito por WhatsApp o continúa al checkout
-        </p>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Carrito</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Envía tu pedido por WhatsApp o continúa al checkout con Wompi o ADDI
+          </p>
+        </div>
         <CartSummary />
       </main>
     </div>

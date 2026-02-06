@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Check } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import type { Product } from "@/types";
 import { BRANDS } from "@/lib/brands";
+
+const FEEDBACK_DURATION_MS = 2000;
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +16,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const [justAdded, setJustAdded] = useState(false);
   const brand = BRANDS[product.brand];
 
   const formatPrice = (price: number) =>
@@ -64,12 +68,26 @@ export default function ProductCard({ product }: ProductCardProps) {
         onClick={(e) => {
           e.preventDefault();
           addItem(product);
+          setJustAdded(true);
+          setTimeout(() => setJustAdded(false), FEEDBACK_DURATION_MS);
         }}
-        className="mx-4 mb-4 flex items-center justify-center gap-2 rounded-xl py-3 font-medium text-white transition-all hover:opacity-90 shadow-md"
+        disabled={justAdded}
+        className="mx-4 mb-4 flex items-center justify-center gap-2 rounded-xl py-3 font-medium text-white transition-all duration-300 hover:opacity-90 shadow-md disabled:pointer-events-none"
         style={{ backgroundColor: brand.primaryColor }}
       >
-        <ShoppingCart size={18} />
-        Agregar al carrito
+        {justAdded ? (
+          <>
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/25 animate-scale-in">
+              <Check size={14} strokeWidth={3} />
+            </span>
+            <span>¡Añadido!</span>
+          </>
+        ) : (
+          <>
+            <ShoppingCart size={18} />
+            Agregar al carrito
+          </>
+        )}
       </button>
     </article>
   );

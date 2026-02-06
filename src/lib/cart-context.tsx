@@ -1,7 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useRef } from "react";
 import type { Product, CartItem } from "@/types";
+
+interface LastAdded {
+  product: Product;
+  quantity: number;
+}
 
 interface CartContextType {
   items: CartItem[];
@@ -11,12 +16,26 @@ interface CartContextType {
   clearCart: () => void;
   total: number;
   itemCount: number;
+  lastAdded: LastAdded | null;
+  clearLastAdded: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const TOAST_DURATION_MS = 3500;
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [lastAdded, setLastAdded] = useState<LastAdded | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearLastAdded = useCallback(() => {
+    setLastAdded(null);
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = null;
+    }
+  }, []);
 
   const addItem = useCallback((product: Product, quantity = 1) => {
     setItems((prev) => {
@@ -30,7 +49,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { product, quantity }];
     });
-  }, []);
+    setLastAdded({ product, quantity });
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(clearLastAdded, TOAST_DURATION_MS);
+  }, [clearLastAdded]);
 
   const removeItem = useCallback((productId: string) => {
     setItems((prev) => prev.filter((i) => i.product.id !== productId));
@@ -66,6 +88,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         total,
         itemCount,
+        lastAdded,
+        clearLastAdded,
       }}
     >
       {children}

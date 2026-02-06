@@ -92,20 +92,20 @@ export default function CartSummary() {
           </div>
         );
       })}
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 space-y-4">
-        <div className="flex justify-between text-lg font-bold">
-          <span>Total</span>
-          <span style={{ color: primaryBrand.primaryColor }}>
+      <div className="rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 font-medium">Total</span>
+          <span className="text-2xl font-bold" style={{ color: primaryBrand.primaryColor }}>
             {formatPrice(total)}
           </span>
         </div>
         <WhatsAppCartButton />
         <Link
           href="/checkout"
-          className="flex w-full items-center justify-center rounded-xl py-3 font-medium text-white transition-colors"
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-4 font-bold text-white transition-all hover:opacity-95 shadow-md"
           style={{ backgroundColor: primaryBrand.primaryColor }}
         >
-          Ir a pagar (Wompi / ADDI)
+          Ir a pagar con Wompi o ADDI
         </Link>
       </div>
     </div>
