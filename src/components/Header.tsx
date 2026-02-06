@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Instagram, Menu, X } from "lucide-react";
+import { ShoppingCart, Instagram, Menu, X, Home } from "lucide-react";
 import { RoundLogo } from "@/components/ui/RoundLogo";
 import { Sidebar } from "@/components/Sidebar";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -81,7 +81,19 @@ export default function Header({ brand }: HeaderProps) {
           </div>
 
           {/* Desktop navigation */}
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-2 md:flex">
+            <Link
+              href="/"
+              className={`rounded-lg p-2.5 text-sm font-medium transition-all ${
+                !brand
+                  ? "text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              }`}
+              style={!brand ? { backgroundColor: "#374151" } : undefined}
+              aria-label="Ir al inicio"
+            >
+              <Home size={20} aria-hidden />
+            </Link>
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
