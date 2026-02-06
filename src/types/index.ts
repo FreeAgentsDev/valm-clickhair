@@ -15,6 +15,20 @@ export interface Brand {
   primaryColor: string;
   secondaryColor: string;
   accentColor?: string;
+  /** Descripción larga de la tienda */
+  description?: string;
+  /** Marcas que maneja (ej. Valm: Walaky, Girly) */
+  brandsCarried?: string[];
+  /** Categorías de productos */
+  categories?: string[];
+  /** Especialidades o destacados */
+  highlights?: string[];
+  /** Dirección física */
+  address?: string;
+  /** Horario de atención */
+  hours?: string;
+  /** WhatsApp para consultas */
+  whatsapp?: string;
 }
 
 export interface Product {

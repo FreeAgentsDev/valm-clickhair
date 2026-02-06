@@ -11,6 +11,27 @@ export const BRANDS: Record<string, Brand> = {
     primaryColor: "#D62839",
     secondaryColor: "#F5A6B8",
     accentColor: "#2B2D42",
+    description:
+      "Valm Beauty es tu tienda multimarca de belleza en Manizales. Ofrecemos las mejores marcas nacionales e internacionales para el cuidado de tu piel, rostro y cuerpo. Desde skincare hasta perfumes capilares, exfoliantes y tratamientos faciales. Trabajamos marcas como Walaky, Girly, Olé, Fresa Morada y más. Productos de calidad con asesoría personalizada. Envíos a todo Colombia.",
+    brandsCarried: ["Walaky", "Girly", "Olé", "Fresa Morada", "y más"],
+    categories: [
+      "Skincare y cuidado facial",
+      "Perfumes capilares",
+      "Exfoliantes corporales",
+      "Cuidado corporal",
+      "Tratamientos faciales",
+      "Maquillaje",
+    ],
+    highlights: [
+      "Tienda física y virtual en Manizales",
+      "Asesoría personalizada en productos",
+      "Marcas premium y nacionales",
+      "Envíos a todo Colombia",
+      "Productos originales garantizados",
+    ],
+    address: "Cra 23A # 60-11 · Manizales, Caldas",
+    hours: "Lunes a Viernes 9:30am - 6:30pm",
+    whatsapp: "3104077106",
   },
   "click-hair": {
     slug: "click-hair",
@@ -22,5 +43,25 @@ export const BRANDS: Record<string, Brand> = {
     primaryColor: "#9B8FD9",
     secondaryColor: "#B8D4E8",
     accentColor: "#F5C6D6",
+    description:
+      "Click Hair es tu especialista en cuidado capilar y corporal en Manizales. Perfumes para el cabello en 7 aromas irresistibles, línea de miel, mantequillas con glitter y rutinas depilatorias. Productos que hacen que tu cabello se vea, sienta y huela impecable. También ofrecemos cuidado corporal con fórmulas pensadas para realzar tu belleza natural. Envíos a todo Colombia.",
+    categories: [
+      "Perfumes para cabello (7 aromas)",
+      "Línea de miel capilar",
+      "Mantequillas con glitter",
+      "Rutinas depilatorias",
+      "Cuidado capilar",
+      "Cuidado corporal",
+    ],
+    highlights: [
+      "7 aromas únicos en perfumes capilares",
+      "Productos que hidratan y perfuman",
+      "Línea de miel para cabello brillante",
+      "Mantequillas con glitter para looks especiales",
+      "Envíos a todo Colombia",
+    ],
+    address: "Cra 23A # 60-11 · Manizales, Caldas",
+    hours: "Lunes a Viernes 9:30am - 6:30pm",
+    whatsapp: "3206770162",
   },
 };
