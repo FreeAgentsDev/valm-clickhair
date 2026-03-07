@@ -1,329 +1,99 @@
-# Panel Admin – Ideas de diseño y arquitectura MVC
+# Panel Admin – Diseño y arquitectura implementada
 
-> Referencias de diseño y estructura de código para el panel admin de Val M Beauty & Click Hair.
-
----
-
-## 1. Ideas de diseño
-
-### 1.1 Paleta de colores (opciones)
-
-El storefront usa rojo (#D62839) y violeta (#9B8FD9). El admin debe sentirse distinto pero coherente.
-
-| Opción | Descripción | Uso |
-|--------|-------------|-----|
-| **A. Neutro oscuro** | Fondo slate/zinc (#0f172a), sidebar oscuro, acentos sutiles | Estilo "dashboard profesional" (Vercel, Linear) |
-| **B. Blanco limpio** | Fondo blanco/gris claro, bordes suaves, acentos de marca | Estilo "minimalista" (Notion, Stripe Dashboard) |
-| **C. Híbrido** | Sidebar oscuro + contenido claro | Estilo "clásico admin" (Shopify, Vercel) |
-| **D. Marca suave** | Fondo blanco con toques de #D62839 o #9B8FD9 en sidebar/acciones | Conexión visual con la tienda |
-
-**Recomendación:** Opción C o D. Sidebar oscuro (#1e293b) + contenido blanco, con acentos de marca en botones primarios.
-
-```css
-/* Variables sugeridas */
---admin-sidebar-bg: #1e293b;
---admin-sidebar-text: #94a3b8;
---admin-sidebar-active: #f8fafc;
---admin-content-bg: #f8fafc;
---admin-card-bg: #ffffff;
---admin-accent: #D62839;  /* o #9B8FD9 para variar */
-```
+> Documentación de lo implementado en Semana 1 para Val M Beauty & Click Hair.
 
 ---
 
-### 1.2 Layout – Sidebar
+## 1. Cambios realizados (Semana 1)
 
-| Estilo | Descripción | Referencia |
-|--------|-------------|------------|
-| **Sidebar fijo** | Siempre visible, ~240px | Vercel, Linear |
-| **Sidebar colapsable** | Iconos cuando está cerrado | Shopify, Notion |
-| **Sidebar + breadcrumbs** | Navegación clara en header | Stripe |
+### 1.1 Panel admin con autenticación
 
-**Estructura sugerida:**
-```
-┌─────────────────────────────────────────────────────────┐
-│ [Logo] Val M Admin                    [Usuario] [Salir] │
-├──────────────┬──────────────────────────────────────────┤
-│              │  Dashboard / Productos / Pedidos          │
-│  📊 Dashboard│  ───────────────────────────────────────  │
-│  📦 Productos│                                          │
-│  📋 Pedidos  │  [Contenido de la página]                 │
-│  🏷️ Marcas   │                                          │
-│              │                                          │
-│  ─────────── │                                          │
-│  🏠 Ver tienda│                                          │
-└──────────────┴──────────────────────────────────────────┘
-```
+- **Login:** Pantalla con contraseña única (`admin123`).
+- **Persistencia:** `localStorage` con clave `admin_authenticated`.
+- **Rutas:** `/admin` (panel), `/admin/login` (acceso).
+- **Protección:** Redirect a login si no hay sesión.
 
----
+### 1.2 Tema claro
 
-### 1.3 Componentes clave
+- Fondo blanco y gris claro (`bg-white`, `bg-gray-50`).
+- Bordes y textos en tonos grises.
+- Acentos de marca (#D62839) en botones y elementos activos.
 
-#### Login
-- Card centrada, fondo suave (gradiente o patrón sutil)
-- Logo de Val M + Click Hair
-- Campos: email, contraseña
-- Botón primario con color de marca
-- Link "¿Olvidaste tu contraseña?" (si el back lo soporta)
+### 1.3 CRUD de productos
 
-#### Dashboard
-- 4 StatCards: Productos, Pedidos del mes, Ventas, Stock bajo
-- Gráfico placeholder (barras o líneas) para tendencias
-- Lista de "Últimos pedidos" (5 items)
-- Accesos rápidos: Nuevo producto, Ver tienda
+- **Almacenamiento:** `localStorage` con clave `admin_products`.
+- **Formulario:** Diseño tipo tarjeta de producto (imagen izquierda, detalles derecha).
+- **Campos:** Marca, nombre, precio, descripción, categoría, stock, peso, imagen.
+- **Acciones:** Crear, editar, eliminar productos.
+- **Storefront:** Productos leídos desde `localStorage` vía `ProductsGridClient` y `ProductPageClient`.
 
-#### Tabla de productos
-- Columnas: Imagen miniatura, Nombre, Marca, Precio, Stock, Acciones
-- Filtro por marca (Valm / Click)
-- Búsqueda por nombre
-- Botón "Nuevo producto" destacado
-- Acciones: Editar (ícono lápiz), Eliminar (ícono papelera) con confirmación
+### 1.4 Contenido general de marca
 
-#### Formulario producto
-- Layout de 2 columnas en desktop: imagen a la izquierda, campos a la derecha
-- Secciones: Información básica, Precio y stock, Envío (peso, dimensiones)
-- Select de marca con colores de cada tienda
-- Preview de imagen al subir/cambiar URL
+- **Secciones editables:** "Sobre [marca]" y "Marcas que manejamos".
+- **Almacenamiento:** `localStorage` con clave `admin_brand_content`.
+- **Marcas:** Valm Beauty y Click Hair, cada una con su contenido.
+- **Storefront:** `BrandInfoSectionClient` muestra el contenido editado en las páginas de marca.
+
+### 1.5 Popup de anuncio
+
+- **Modal:** Aparece al cargar la página si está habilitado.
+- **Configuración:** Título, contenido, imagen, botón CTA (texto + URL).
+- **Almacenamiento:** `localStorage` con clave `admin_popup`.
+- **Comportamiento:** Se oculta por sesión al cerrar (no vuelve hasta recargar).
 
 ---
 
-### 1.4 Referencias visuales
-
-| Panel | Qué tomar |
-|-------|-----------|
-| **Vercel Dashboard** | Sidebar oscuro, cards limpias, tipografía clara |
-| **Stripe Dashboard** | Tablas bien espaciadas, estados (badges), acciones contextuales |
-| **Shopify Admin** | Filtros, búsqueda, empty states amigables |
-| **Linear** | Minimalismo, iconografía consistente, feedback sutil |
-| **Shadcn/ui** | Componentes base (Table, Card, Button, Input) – compatible con Tailwind |
-
----
-
-### 1.5 Tipografía y espaciado
-
-- **Fuente:** Plus Jakarta Sans (ya usada en el proyecto)
-- **Títulos:** font-bold, text-xl / text-2xl
-- **Cuerpo:** text-sm / text-base, text-gray-600
-- **Espaciado:** p-6 en cards, gap-4/gap-6 entre elementos
-- **Bordes:** rounded-xl (16px) para cards y botones
-
----
-
-## 2. Arquitectura tipo MVC
-
-Next.js no es MVC puro, pero podemos mapear responsabilidades:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        CAPA DE PRESENTACIÓN (View)                │
-│  app/admin/*, components/admin/*                                 │
-│  - Páginas y componentes UI                                      │
-│  - Solo renderizan y delegan lógica                              │
-└─────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     CAPA DE LÓGICA (Controller)                  │
-│  hooks/, actions/, route handlers                                │
-│  - useAdminAuth, useProducts, useOrders                          │
-│  - Server Actions o API routes que orquestan                     │
-└─────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       CAPA DE DATOS (Model)                      │
-│  lib/, types/                                                    │
-│  - admin-api.ts (cliente HTTP)                                   │
-│  - types (Product, Order, etc.)                                  │
-│  - Servicios que hablan con el backend                           │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 3. Estructura de carpetas (MVC adaptado)
+## 2. Estructura de archivos creados/modificados
 
 ```
 src/
-├── types/                    # MODEL – Definiciones
-│   ├── index.ts              # Tipos compartidos (Product, Brand, etc.)
-│   └── admin.ts              # Tipos específicos del admin (AdminUser, ApiResponse)
-│
-├── lib/                      # MODEL – Acceso a datos
-│   ├── products.ts           # Datos estáticos (fallback)
-│   ├── brands.ts
-│   └── admin-api.ts          # Cliente API para el backend
-│
-├── services/                 # MODEL – Lógica de negocio (opcional)
-│   └── product-service.ts   # Validaciones, transformaciones antes de API
-│
-├── hooks/                    # CONTROLLER – Lógica reutilizable
-│   ├── useAdminAuth.ts       # Estado de auth, login, logout
-│   ├── useProducts.ts        # Fetch, create, update, delete productos
-│   └── useOrders.ts          # Fetch pedidos
-│
-├── app/admin/                # VIEW – Páginas
-│   ├── layout.tsx
-│   ├── page.tsx
-│   ├── login/page.tsx
-│   └── productos/
-│       ├── page.tsx
-│       ├── nuevo/page.tsx
-│       └── [id]/page.tsx
-│
-├── components/admin/         # VIEW – Componentes UI
-│   ├── layout/
-│   │   ├── AdminSidebar.tsx
-│   │   └── AdminHeader.tsx
-│   ├── dashboard/
-│   │   ├── StatCard.tsx
-│   │   └── RecentOrders.tsx
-│   ├── products/
-│   │   ├── ProductTable.tsx
-│   │   ├── ProductForm.tsx
-│   │   └── ProductFilters.tsx
-│   └── ui/                   # Componentes genéricos (inputs, modals)
-│       ├── DataTable.tsx
-│       └── ConfirmDialog.tsx
-│
-└── app/api/                  # CONTROLLER – Endpoints propios (si hace falta)
-    └── admin/
-        └── [...proxy]/       # Proxy al backend si es necesario
+├── app/
+│   ├── admin/
+│   │   ├── page.tsx           # Panel principal
+│   │   └── login/page.tsx     # Login
+│   ├── [brand]/page.tsx       # Usa BrandInfoSectionClient
+│   └── layout.tsx             # DataInitializer + PopupAnnouncement
+├── components/
+│   ├── admin/
+│   │   ├── AdminPanel.tsx
+│   │   ├── DataInitializer.tsx
+│   │   ├── layout/AdminLayout.tsx
+│   │   └── editors/
+│   │       ├── ProductEditor.tsx
+│   │       ├── BrandContentEditor.tsx
+│   │       └── PopupEditor.tsx
+│   ├── BrandInfoSectionClient.tsx
+│   ├── PopupAnnouncement.tsx
+│   └── ProductsGridClient.tsx
+├── hooks/
+│   ├── useAdmin.ts
+│   ├── useBrandContent.ts
+│   └── usePopup.ts
+├── lib/
+│   └── storage.ts             # Servicio localStorage
+└── types/
+    └── index.ts               # Product, BrandContent, PopupConfig
 ```
 
 ---
 
-## 4. Flujo de datos (ejemplo: listar productos)
+## 3. Tabs del panel admin
 
-```
-┌──────────────┐     ┌─────────────────┐     ┌──────────────────┐
-│ productos/   │     │ useProducts()   │     │ admin-api.ts     │
-│ page.tsx     │────▶│ (hook)          │────▶│ getProducts()     │
-│ (View)       │     │ (Controller)    │     │ (Model)          │
-└──────────────┘     └─────────────────┘     └──────────────────┘
-       │                       │                        │
-       │                       │                        ▼
-       │                       │              ┌──────────────────┐
-       │                       │              │ Backend API      │
-       │                       │              │ GET /products    │
-       │                       │              └──────────────────┘
-       │                       │                        │
-       │                       │◀───────────────────────┘
-       │                       │  { products: [...] }
-       │◀───────────────────────┘
-       │  Renderiza ProductTable
-       ▼
-┌──────────────┐
-│ ProductTable │
-│ (View)       │
-└──────────────┘
-```
+| Tab | Descripción |
+|-----|-------------|
+| **Productos** | CRUD de productos con formulario tipo tarjeta |
+| **Contenido general** | Editar "Sobre" y "Marcas" por marca |
+| **Anuncio popup** | Habilitar/deshabilitar y configurar el modal de bienvenida |
 
 ---
 
-## 5. Responsabilidades por capa
+## 4. Flujo de datos (localStorage)
 
-### Model (lib/, types/, services/)
-- Definir tipos e interfaces
-- Llamar al backend (fetch, axios)
-- Transformar respuestas (normalizar datos)
-- **No:** lógica de UI, estado de formularios
-
-### Controller (hooks/, Server Actions)
-- Orquestar llamadas al Model
-- Gestionar estado (loading, error, data)
-- Validar antes de enviar
-- **No:** JSX, estilos
-
-### View (app/, components/)
-- Renderizar UI
-- Capturar eventos y llamar a hooks/actions
-- Mostrar loading y errores
-- **No:** fetch directo, lógica de negocio compleja
+- **admin_products:** Lista de productos.
+- **admin_brand_content:** Contenido por marca (descripción, marcas que manejamos).
+- **admin_popup:** Configuración del popup (enabled, título, contenido, imagen, CTA).
+- **storage-update:** Evento disparado al guardar para sincronizar vistas.
 
 ---
 
-## 6. Ejemplo de código (ProductForm)
-
-```tsx
-// VIEW – ProductForm.tsx
-// Solo UI, delega a useProducts
-function ProductForm({ product, onSuccess }: Props) {
-  const { createProduct, updateProduct, isLoading, error } = useProducts();
-  const [formData, setFormData] = useState(product ?? defaultValues);
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (product) {
-      updateProduct(product.id, formData).then(onSuccess);
-    } else {
-      createProduct(formData).then(onSuccess);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* inputs controlados por formData */}
-    </form>
-  );
-}
-```
-
-```ts
-// CONTROLLER – useProducts.ts
-// Orquesta llamadas al API
-function useProducts() {
-  const [data, setData] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchProducts = async () => {
-    setLoading(true);
-    const result = await adminApi.getProducts();
-    setData(result);
-    setLoading(false);
-  };
-
-  const createProduct = async (payload: CreateProductDTO) => {
-    await adminApi.postProduct(payload);
-    await fetchProducts();
-  };
-
-  return { products: data, fetchProducts, createProduct, ... };
-}
-```
-
-```ts
-// MODEL – admin-api.ts
-// Solo HTTP, sin estado
-export const adminApi = {
-  async getProducts(): Promise<Product[]> {
-    const res = await fetch(`${API_URL}/products`);
-    if (!res.ok) throw new Error("Error fetching products");
-    return res.json();
-  },
-  async postProduct(payload: CreateProductDTO) {
-    const res = await fetch(`${API_URL}/products`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error("Error creating product");
-    return res.json();
-  },
-};
-```
-
----
-
-## 7. Resumen
-
-| Aspecto | Decisión |
-|---------|----------|
-| **Diseño** | Sidebar oscuro + contenido claro, acentos de marca |
-| **Layout** | Sidebar fijo 240px, header con usuario y logout |
-| **Componentes** | Cards, tablas, formularios con Tailwind + posible Shadcn |
-| **Arquitectura** | MVC adaptado: Model (lib, types), Controller (hooks), View (app, components) |
-| **Flujo** | Página → Hook → API → Backend |
-
----
-
-*Documento de referencia para diseño y arquitectura del panel admin.*
+*Documento actualizado con los cambios implementados en Semana 1.*
