@@ -3,6 +3,8 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import CartToast from "@/components/CartToast";
+import PopupAnnouncement from "@/components/PopupAnnouncement";
+import DataInitializer from "@/components/admin/DataInitializer";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -110,6 +112,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <CartProvider>
+          <DataInitializer />
+          <PopupAnnouncement />
           <CartToast />
           {children}
         </CartProvider>
