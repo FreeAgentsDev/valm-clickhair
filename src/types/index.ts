@@ -45,6 +45,25 @@ export interface Product {
   dimensions?: { width: number; height: number; length: number }; // cm
 }
 
+/** Configuración del popup de anuncio (admin) */
+export interface PopupConfig {
+  enabled: boolean;
+  title?: string;
+  content?: string;
+  image?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+}
+
+/** Contenido editable de marca (admin) */
+export interface BrandContent {
+  brand: BrandSlug;
+  description?: string;
+  brandsCarried?: string[];
+  categories?: string[];
+  highlights?: string[];
+}
+
 export interface CartItem {
   product: Product;
   quantity: number;

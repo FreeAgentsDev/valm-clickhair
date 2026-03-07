@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Instagram, Menu, X, Home } from "lucide-react";
+import { ShoppingCart, Instagram, Menu, X, Home, Lock } from "lucide-react";
 import { RoundLogo } from "@/components/ui/RoundLogo";
 import { Sidebar } from "@/components/Sidebar";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -112,6 +112,14 @@ export default function Header({ brand }: HeaderProps) {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/admin/login"
+              className="ml-2 rounded-lg p-2 text-gray-500 transition-colors hover:bg-violet-50 hover:text-violet-600"
+              aria-label="Panel Admin"
+              title="Admin"
+            >
+              <Lock size={20} aria-hidden />
+            </Link>
             {currentBrand && (
               <a
                 href={currentBrand.instagramUrl}

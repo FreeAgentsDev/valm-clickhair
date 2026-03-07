@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { X, Home, Instagram, ShoppingCart } from "lucide-react";
+import { X, Home, Instagram, ShoppingCart, Lock } from "lucide-react";
 import { RoundLogo } from "@/components/ui/RoundLogo";
 import { useCart } from "@/lib/cart-context";
 import { BRANDS } from "@/lib/brands";
@@ -211,6 +211,18 @@ export function Sidebar({ isOpen, isClosing, onClose, onLinkClick, brand }: Side
                 </a>
               </li>
             )}
+            <li>
+              <Link
+                href="/admin/login"
+                onClick={onLinkClick}
+                className="flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3.5 font-medium text-violet-600 transition-colors hover:bg-violet-50 active:bg-violet-100"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+                  <Lock size={20} strokeWidth={2} aria-hidden />
+                </span>
+                Admin
+              </Link>
+            </li>
           </ul>
         </nav>
 
