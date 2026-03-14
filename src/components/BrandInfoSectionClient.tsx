@@ -40,7 +40,6 @@ export default function BrandInfoSectionClient({
   otherBrand,
 }: BrandInfoSectionClientProps) {
   const [brandInfo, setBrandInfo] = useState<Brand>(() => BRANDS[brand]);
-  const isValm = brand === "valm-beauty";
 
   useEffect(() => {
     const stored = storageService.getBrandContent([]);
@@ -62,55 +61,31 @@ export default function BrandInfoSectionClient({
   const waUrl = `https://wa.me/57${whatsappNumber.replace(/\D/g, "")}`;
   const otherBrandInfo = BRANDS[otherBrand];
 
+  const sectionClass = "rounded-2xl p-6 sm:p-8 bg-[#FDF2F4] border border-[#F6BCCB]/40";
+
   return (
-    <div className="space-y-10">
-      {/* Sobre la tienda */}
+    <div className="space-y-6">
       {brandInfo.description && (
-        <section
-          className="rounded-2xl p-6 sm:p-8"
-          style={{
-            backgroundColor: isValm ? "#FFF5F7" : "#F8F5FF",
-            borderColor: isValm ? "#F5A6B8" : "#B8D4E8",
-            borderWidth: 1,
-          }}
-        >
+        <section className={sectionClass}>
           <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900">
-            <Sparkles
-              size={22}
-              style={{ color: brandInfo.primaryColor }}
-              aria-hidden
-            />
+            <Sparkles size={20} className="text-[#E93B3C]" aria-hidden />
             Sobre {brandInfo.name}
           </h2>
-          <p className="text-gray-700 leading-relaxed">{brandInfo.description}</p>
+          <p className="text-gray-600 leading-relaxed">{brandInfo.description}</p>
         </section>
       )}
 
-      {/* Marcas que manejamos */}
       {brandInfo.brandsCarried && brandInfo.brandsCarried.length > 0 && (
-        <section
-          className="rounded-2xl p-6 sm:p-8"
-          style={{
-            backgroundColor: isValm ? "#FFF5F7" : "#F8F5FF",
-            borderColor: isValm ? "#F5A6B8" : "#B8D4E8",
-            borderWidth: 1,
-          }}
-        >
+        <section className={sectionClass}>
           <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900">
-            <Package size={22} style={{ color: brandInfo.primaryColor }} aria-hidden />
+            <Package size={20} className="text-[#E93B3C]" aria-hidden />
             Marcas que manejamos
           </h2>
           <div className="flex flex-wrap gap-2">
             {brandInfo.brandsCarried.map((b) => (
               <span
                 key={b}
-                className="rounded-full px-4 py-2 text-sm font-medium"
-                style={{
-                  backgroundColor: brandInfo.primaryColor + "20",
-                  color: brandInfo.primaryColor,
-                  borderWidth: 1,
-                  borderColor: brandInfo.primaryColor + "40",
-                }}
+                className="rounded-full px-4 py-2 text-sm font-medium bg-[#E93B3C]/10 text-[#E93B3C] border border-[#E93B3C]/20"
               >
                 {b}
               </span>
@@ -119,30 +94,15 @@ export default function BrandInfoSectionClient({
         </section>
       )}
 
-      {/* Categorías */}
       {brandInfo.categories && brandInfo.categories.length > 0 && (
-        <section
-          className="rounded-2xl p-6 sm:p-8"
-          style={{
-            backgroundColor: isValm ? "#FFF5F7" : "#F8F5FF",
-            borderColor: isValm ? "#F5A6B8" : "#B8D4E8",
-            borderWidth: 1,
-          }}
-        >
+        <section className={sectionClass}>
           <h2 className="mb-4 text-xl font-bold text-gray-900">
-            Qué encontrás en {brandInfo.name}
+            Que encontras en {brandInfo.name}
           </h2>
           <ul className="grid gap-2 sm:grid-cols-2">
             {brandInfo.categories.map((cat) => (
-              <li
-                key={cat}
-                className="flex items-center gap-2 text-gray-700"
-              >
-                <CheckCircle2
-                  size={18}
-                  style={{ color: brandInfo.primaryColor }}
-                  aria-hidden
-                />
+              <li key={cat} className="flex items-center gap-2 text-gray-600">
+                <CheckCircle2 size={18} className="text-[#E93B3C]" aria-hidden />
                 {cat}
               </li>
             ))}
@@ -150,28 +110,15 @@ export default function BrandInfoSectionClient({
         </section>
       )}
 
-      {/* Destacados */}
       {brandInfo.highlights && brandInfo.highlights.length > 0 && (
-        <section
-          className="rounded-2xl p-6 sm:p-8"
-          style={{
-            backgroundColor: isValm ? "#FFF5F7" : "#F8F5FF",
-            borderColor: isValm ? "#F5A6B8" : "#B8D4E8",
-            borderWidth: 1,
-          }}
-        >
+        <section className={sectionClass}>
           <h2 className="mb-4 text-xl font-bold text-gray-900">
-            Por qué elegirnos
+            Por que elegirnos
           </h2>
           <ul className="space-y-3">
             {brandInfo.highlights.map((h) => (
-              <li key={h} className="flex items-start gap-2 text-gray-700">
-                <Sparkles
-                  size={18}
-                  className="mt-0.5 shrink-0"
-                  style={{ color: brandInfo.primaryColor }}
-                  aria-hidden
-                />
+              <li key={h} className="flex items-start gap-2 text-gray-600">
+                <Sparkles size={18} className="mt-0.5 shrink-0 text-[#E93B3C]" aria-hidden />
                 {h}
               </li>
             ))}
@@ -179,17 +126,9 @@ export default function BrandInfoSectionClient({
         </section>
       )}
 
-      {/* Ubicación y contacto */}
-      <section
-        className="rounded-2xl p-6 sm:p-8"
-        style={{
-          backgroundColor: isValm ? "#FFF5F7" : "#F8F5FF",
-          borderColor: isValm ? "#F5A6B8" : "#B8D4E8",
-          borderWidth: 1,
-        }}
-      >
+      <section className={sectionClass}>
         <h2 className="mb-4 text-xl font-bold text-gray-900">
-          Ubicación y contacto
+          Ubicacion y contacto
         </h2>
         <div className="space-y-4">
           {brandInfo.address && (
@@ -197,23 +136,15 @@ export default function BrandInfoSectionClient({
               href="https://maps.google.com/?q=Cra+23A+60-11+Manizales"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 text-gray-700 hover:underline"
+              className="flex items-center gap-3 text-gray-600 hover:text-[#E93B3C] transition-colors"
             >
-              <MapPin
-                size={20}
-                style={{ color: brandInfo.primaryColor }}
-                aria-hidden
-              />
+              <MapPin size={20} className="text-[#E93B3C]" aria-hidden />
               {brandInfo.address}
             </a>
           )}
           {brandInfo.hours && (
-            <div className="flex items-center gap-3 text-gray-700">
-              <Clock
-                size={20}
-                style={{ color: brandInfo.primaryColor }}
-                aria-hidden
-              />
+            <div className="flex items-center gap-3 text-gray-600">
+              <Clock size={20} className="text-[#E93B3C]" aria-hidden />
               {brandInfo.hours}
             </div>
           )}
@@ -222,29 +153,27 @@ export default function BrandInfoSectionClient({
               href={brandInfo.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: brandInfo.primaryColor }}
+              className="inline-flex items-center gap-2 rounded-full bg-[#E93B3C] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
             >
-              <Instagram size={18} aria-hidden />
+              <Instagram size={16} aria-hidden />
               @{brandInfo.instagram}
             </a>
             <a
               href={otherBrandInfo.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: otherBrandInfo.primaryColor }}
+              className="inline-flex items-center gap-2 rounded-full bg-[#F6BCCB] px-5 py-2.5 text-sm font-semibold text-[#E93B3C] transition-all hover:opacity-90"
             >
-              <Instagram size={18} aria-hidden />
+              <Instagram size={16} aria-hidden />
               @{otherBrandInfo.instagram}
             </a>
             <a
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-emerald-700"
             >
-              <MessageCircle size={18} aria-hidden />
+              <MessageCircle size={16} aria-hidden />
               WhatsApp
             </a>
           </div>

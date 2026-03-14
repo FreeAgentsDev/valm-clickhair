@@ -106,8 +106,7 @@ export default function PopupAnnouncement() {
             <a
               href={config.ctaUrl}
               onClick={handleClose}
-              className="inline-block rounded-lg px-6 py-3 text-sm font-bold text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: "#D62839" }}
+              className="inline-block rounded-full px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90 bg-brand-red"
             >
               {config.ctaText}
             </a>

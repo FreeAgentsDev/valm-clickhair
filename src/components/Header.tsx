@@ -1,22 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Instagram, Menu, X, Home, Lock } from "lucide-react";
-import { RoundLogo } from "@/components/ui/RoundLogo";
+import Image from "next/image";
+import { ShoppingCart, Menu, X, Lock, Droplets, Flower2, Sparkles, Heart, Star, Gift, LayoutGrid } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
 import { useSidebar } from "@/hooks/useSidebar";
 import { useCart } from "@/lib/cart-context";
 import { BRANDS } from "@/lib/brands";
 import type { BrandSlug } from "@/types";
 
+const CATEGORIES = [
+  { href: "/catalogo", label: "Catalogo", icon: LayoutGrid },
+  { href: "/catalogo?categoria=skincare", label: "Skincare", icon: Droplets },
+  { href: "/catalogo?categoria=capilares", label: "Capilares", icon: Flower2 },
+  { href: "/catalogo?categoria=exfoliantes", label: "Exfoliantes", icon: Sparkles },
+  { href: "/catalogo?categoria=corporales", label: "Corporales", icon: Heart },
+  { href: "/catalogo?categoria=maquillaje", label: "Maquillaje", icon: Star },
+  { href: "/catalogo?categoria=kits", label: "Kits", icon: Gift },
+] as const;
+
 interface HeaderProps {
   brand?: BrandSlug;
 }
-
-const NAV_LINKS = [
-  { href: "/valm-beauty", label: "Valm Beauty", color: BRANDS["valm-beauty"].primaryColor },
-  { href: "/click-hair", label: "Click Hair", color: BRANDS["click-hair"].primaryColor },
-] as const;
 
 export default function Header({ brand }: HeaderProps) {
   const { itemCount } = useCart();
@@ -25,146 +30,114 @@ export default function Header({ brand }: HeaderProps) {
 
   return (
     <>
-      <header
-        className="sticky top-0 z-50 w-full border-b shadow-sm font-sans"
-        style={{
-          borderColor: currentBrand ? `${currentBrand.primaryColor}15` : "#e5e7eb",
-          backgroundColor: "rgba(255, 255, 255, 0.98)",
-          backdropFilter: "blur(12px)",
-        }}
-      >
-        <nav
-          className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8"
-          aria-label="Navegación principal"
-        >
-          {/* Logo + Brand name */}
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            {currentBrand ? (
-              <Link
-                href={`/${currentBrand.slug}`}
-                className="flex items-center gap-3 transition-opacity hover:opacity-90"
-              >
-                <RoundLogo src={currentBrand.logo} alt={currentBrand.name} size={44} />
-                <span
-                  className="hidden truncate text-base font-bold min-[480px]:block sm:text-lg"
-                  style={{ color: currentBrand.primaryColor }}
-                >
-                  {currentBrand.name}
-                </span>
-              </Link>
-            ) : (
-              <Link
-                href="/"
-                className="flex items-center gap-3 transition-opacity hover:opacity-90"
-              >
-                <div className="flex items-center gap-1.5">
-                  <RoundLogo
-                    src={BRANDS["valm-beauty"].logo}
-                    alt="Valm Beauty"
-                    size={38}
-                    ring={false}
-                    className="border-2 border-[#F5A6B8]/50"
-                  />
-                  <RoundLogo
-                    src={BRANDS["click-hair"].logo}
-                    alt="Click Hair"
-                    size={38}
-                    ring={false}
-                    className="border-2 border-[#B8D4E8]/50"
-                  />
-                </div>
-                <span className="hidden truncate text-base font-bold text-gray-900 sm:block">
-                  Tienda Virtual
-                </span>
-              </Link>
-            )}
-          </div>
+      {/* Marquee */}
+      <div className="bg-brand-pink/60 overflow-hidden animate-header-in" style={{ animationDelay: "0s" }}>
+        <div className="flex animate-marquee whitespace-nowrap py-2 w-max">
+          {[...Array(2)].map((_, i) => (
+            <span key={i} className="flex items-center" aria-hidden={i > 0 ? true : undefined}>
+              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Envíos a todo Colombia</span>
+              <span className="mx-2 text-brand-red/40">·</span>
+              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Pago seguro con Wompi y ADDI</span>
+              <span className="mx-2 text-brand-red/40">·</span>
+              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Productos 100% originales</span>
+              <span className="mx-2 text-brand-red/40">·</span>
+              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Compra fácil y rápido</span>
+              <span className="mx-2 text-brand-red/40">·</span>
+              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Marcas certificadas</span>
+              <span className="mx-2 text-brand-red/40">·</span>
+            </span>
+          ))}
+        </div>
+      </div>
 
-          {/* Desktop navigation */}
-          <div className="hidden items-center gap-2 md:flex">
-            <Link
-              href="/"
-              className={`rounded-lg p-2.5 text-sm font-medium transition-all ${
-                !brand
-                  ? "text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`}
-              style={!brand ? { backgroundColor: "#374151" } : undefined}
-              aria-label="Ir al inicio"
-            >
-              <Home size={20} aria-hidden />
-            </Link>
-            {NAV_LINKS.map((link) => (
+      <header className="sticky top-0 z-50 w-full bg-white border-b border-brand-pink/30 shadow-sm animate-header-in" style={{ animationDelay: "0.05s" }}>
+
+        {/* ── Main row ── */}
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 lg:px-8">
+
+          {/* Logo */}
+          <Link
+            href={currentBrand ? `/${currentBrand.slug}` : "/"}
+            className="flex shrink-0 items-center transition-opacity hover:opacity-75"
+          >
+            <Image
+              src="/logos/logo-navbar.svg"
+              alt="Valm Beauty"
+              width={140}
+              height={47}
+              className="h-10 w-auto object-contain"
+              priority
+            />
+          </Link>
+
+          {/* Desktop categories — centered */}
+          <nav
+            className="hidden flex-1 items-center justify-center gap-0.5 md:flex"
+            aria-label="Categorias"
+          >
+            {CATEGORIES.map(({ href, label }) => (
               <Link
-                key={link.href}
-                href={link.href}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                  brand === link.href.slice(1)
-                    ? "text-white shadow-md"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
-                style={
-                  brand === link.href.slice(1)
-                    ? { backgroundColor: link.color }
-                    : undefined
-                }
+                key={href}
+                href={href}
+                className="rounded-full px-4 py-2 text-sm font-medium text-gray-600 transition-all hover:bg-brand-rose hover:text-brand-red"
               >
-                {link.label}
+                {label}
               </Link>
             ))}
-            <Link
-              href="/admin/login"
-              className="ml-2 rounded-lg p-2 text-gray-500 transition-colors hover:bg-violet-50 hover:text-violet-600"
-              aria-label="Panel Admin"
-              title="Admin"
-            >
-              <Lock size={20} aria-hidden />
-            </Link>
-            {currentBrand && (
-              <a
-                href={currentBrand.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-2 rounded-lg p-2 text-gray-500 transition-colors hover:bg-pink-50 hover:text-pink-600"
-                aria-label="Ver Instagram"
-              >
-                <Instagram size={20} aria-hidden />
-              </a>
-            )}
-          </div>
+          </nav>
 
-          {/* Cart + Mobile menu button */}
+          {/* Right actions */}
           <div className="flex shrink-0 items-center gap-1">
             <Link
               href="/cart"
-              className="relative flex items-center justify-center rounded-full p-2.5 text-gray-600 transition-colors hover:bg-gray-100"
-              style={{ color: currentBrand?.primaryColor ?? "#374151" }}
+              className="relative flex items-center justify-center rounded-full p-2.5 text-gray-700 transition-colors hover:bg-brand-rose hover:text-brand-red"
               aria-label={`Carrito (${itemCount} productos)`}
             >
-              <ShoppingCart size={22} strokeWidth={2} aria-hidden />
+              <ShoppingCart size={21} strokeWidth={1.8} aria-hidden />
               {itemCount > 0 && (
-                <span
-                  className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full text-[11px] font-bold text-white shadow-md ring-2 ring-white"
-                  style={{
-                    backgroundColor: currentBrand?.primaryColor ?? "#D62839",
-                  }}
-                >
+                <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand-red text-[11px] font-bold text-white ring-2 ring-white">
                   {itemCount > 99 ? "99+" : itemCount}
                 </span>
               )}
             </Link>
 
+            <Link
+              href="/admin/login"
+              className="hidden rounded-full p-2 text-gray-400 transition-colors hover:bg-brand-rose hover:text-brand-red md:flex"
+              aria-label="Admin"
+              title="Panel Admin"
+            >
+              <Lock size={16} aria-hidden />
+            </Link>
+
             <button
               type="button"
               onClick={sidebar.toggle}
-              className="rounded-lg p-2.5 text-gray-600 transition-colors hover:bg-gray-100 md:hidden"
-              aria-label={sidebar.isOpen ? "Cerrar menú" : "Abrir menú"}
+              className="rounded-full p-2.5 text-gray-700 transition-colors hover:bg-brand-rose md:hidden"
+              aria-label={sidebar.isOpen ? "Cerrar menu" : "Abrir menu"}
               aria-expanded={sidebar.isOpen}
             >
-              {sidebar.isOpen ? <X size={24} aria-hidden /> : <Menu size={24} aria-hidden />}
+              {sidebar.isOpen ? <X size={22} aria-hidden /> : <Menu size={22} aria-hidden />}
             </button>
           </div>
-        </nav>
+        </div>
+
+        {/* ── Mobile categories row ── */}
+        <div className="border-t border-brand-pink/20 md:hidden">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide px-4 py-2">
+            {CATEGORIES.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex shrink-0 items-center gap-1.5 rounded-full border border-brand-pink/40 bg-brand-rose/50 px-3 py-1.5 text-xs font-semibold text-gray-600 whitespace-nowrap transition-all hover:border-brand-red/30 hover:bg-brand-rose hover:text-brand-red"
+              >
+                <Icon size={11} aria-hidden />
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
       </header>
 
       <Sidebar

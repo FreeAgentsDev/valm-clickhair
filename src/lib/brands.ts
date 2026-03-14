@@ -7,10 +7,10 @@ export const BRANDS: Record<string, Brand> = {
     tagline: "Tienda Multimarca · Belleza y cuidado en Manizales",
     instagram: "valm_beauty_mzl",
     instagramUrl: "https://www.instagram.com/valm_beauty_mzl",
-    logo: "/logos/valmlogo.png",
-    primaryColor: "#D62839",
-    secondaryColor: "#F5A6B8",
-    accentColor: "#2B2D42",
+    logo: "/logos/logo.svg",
+    primaryColor: "#E93B3C",
+    secondaryColor: "#F6BCCB",
+    accentColor: "#000000",
     description:
       "Valm Beauty es tu tienda multimarca de belleza en Manizales. Ofrecemos las mejores marcas nacionales e internacionales para el cuidado de tu piel, rostro y cuerpo. Desde skincare hasta perfumes capilares, exfoliantes y tratamientos faciales. Trabajamos marcas como Walaky, Girly, Olé, Fresa Morada y más. Productos de calidad con asesoría personalizada. Envíos a todo Colombia.",
     brandsCarried: ["Walaky", "Girly", "Olé", "Fresa Morada", "y más"],
@@ -40,9 +40,9 @@ export const BRANDS: Record<string, Brand> = {
     instagram: "click_hair_manizales",
     instagramUrl: "https://www.instagram.com/click_hair_manizales",
     logo: "/logos/clickhairlogo.png",
-    primaryColor: "#9B8FD9",
-    secondaryColor: "#B8D4E8",
-    accentColor: "#F5C6D6",
+    primaryColor: "#E93B3C",
+    secondaryColor: "#F6BCCB",
+    accentColor: "#000000",
     description:
       "Click Hair es tu especialista en cuidado capilar y corporal en Manizales. Perfumes para el cabello en 7 aromas irresistibles, línea de miel, mantequillas con glitter y rutinas depilatorias. Productos que hacen que tu cabello se vea, sienta y huela impecable. También ofrecemos cuidado corporal con fórmulas pensadas para realzar tu belleza natural. Envíos a todo Colombia.",
     categories: [
