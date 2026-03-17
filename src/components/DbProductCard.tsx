@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ShoppingCart, Check } from "lucide-react";
+import { useState } from "react";
 import type { DbProduct } from "@/lib/db";
+import { useCart } from "@/lib/cart-context";
+import type { Product } from "@/types";
 
 interface DbProductCardProps {
   product: DbProduct;
@@ -15,12 +19,41 @@ const formatPrice = (price: number) =>
     maximumFractionDigits: 0,
   }).format(price);
 
+/** Convierte DbProduct (DB) a Product (Cart) */
+function toCartProduct(p: DbProduct): Product {
+  const discountedPrice = p.descuento > 0
+    ? p.precio * (1 - p.descuento / 100)
+    : p.precio;
+  return {
+    id: String(p.id),
+    brand: "valm-beauty",
+    name: p.nombre,
+    description: p.descripcion || "",
+    price: discountedPrice,
+    image: p.images[0] || "/logos/logo.png",
+    images: p.images,
+    category: p.categoria,
+    stock: 99,
+  };
+}
+
 export default function DbProductCard({ product }: DbProductCardProps) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+
   const imageUrl = product.images[0] || "/logos/valmlogo.png";
   const hasDiscount = product.descuento > 0;
   const discountedPrice = hasDiscount
     ? product.precio * (1 - product.descuento / 100)
     : product.precio;
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(toCartProduct(product));
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
 
   return (
     <Link href={`/catalogo/${product.id}`} className="group block">
@@ -51,15 +84,28 @@ export default function DbProductCard({ product }: DbProductCardProps) {
               {product.descripcion}
             </p>
           )}
-          <div className="mt-auto flex items-baseline gap-2">
-            <p className="text-lg sm:text-xl font-extrabold text-[#E93B3C]">
-              {formatPrice(discountedPrice)}
-            </p>
-            {hasDiscount && (
-              <p className="text-sm text-gray-400 line-through">
-                {formatPrice(product.precio)}
+          <div className="mt-auto flex items-center justify-between gap-2">
+            <div className="flex items-baseline gap-2">
+              <p className="text-lg sm:text-xl font-extrabold text-[#E93B3C]">
+                {formatPrice(discountedPrice)}
               </p>
-            )}
+              {hasDiscount && (
+                <p className="text-sm text-gray-400 line-through">
+                  {formatPrice(product.precio)}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={handleAddToCart}
+              className={`shrink-0 flex items-center justify-center rounded-xl p-2.5 transition-all duration-300 ${
+                added
+                  ? "bg-emerald-500 text-white scale-110"
+                  : "bg-[#E93B3C] text-white hover:bg-[#c9282a] active:scale-95"
+              }`}
+              aria-label="Agregar al carrito"
+            >
+              {added ? <Check size={18} /> : <ShoppingCart size={18} />}
+            </button>
           </div>
         </div>
       </article>

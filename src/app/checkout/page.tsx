@@ -4,13 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import { useCart } from "@/lib/cart-context";
-import { CreditCard, Wallet, Truck } from "lucide-react";
+import { CreditCard, Wallet, Truck, ShoppingBag } from "lucide-react";
 import type { ShippingAddress } from "@/types";
 
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
   const router = useRouter();
-  const [paymentMethod, setPaymentMethod] = useState<"wompi" | "addi">("wompi");
+  const [paymentMethod, setPaymentMethod] = useState<"wompi" | "addi" | "mercado-pago">("mercado-pago");
   const [shippingCost, setShippingCost] = useState(15000); // Default Manizales
   const [loading, setLoading] = useState(false);
   const [address, setAddress] = useState<ShippingAddress>({
@@ -38,7 +38,37 @@ export default function CheckoutPage() {
       const orderTotal = total + shippingCost;
       const reference = `ORD-${Date.now()}`;
 
-      if (paymentMethod === "wompi") {
+      if (paymentMethod === "mercado-pago") {
+        const res = await fetch("/api/mercado-pago/create-preference", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map((item) => ({
+              title: item.product.name,
+              quantity: item.quantity,
+              unit_price: item.product.price,
+              picture_url: item.product.image,
+            })),
+            payer: {
+              name: address.name,
+              email: address.email,
+              phone: address.phone,
+            },
+            reference,
+            redirectUrl: `${window.location.origin}/checkout/success?ref=${reference}`,
+          }),
+        });
+        const data = await res.json();
+        if (data.init_point) {
+          window.location.href = data.init_point;
+          return;
+        }
+        if (data.sandbox_init_point) {
+          window.location.href = data.sandbox_init_point;
+          return;
+        }
+        if (data.error) throw new Error(data.error);
+      } else if (paymentMethod === "wompi") {
         const res = await fetch("/api/wompi/create-transaction", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -177,7 +207,38 @@ export default function CheckoutPage() {
           {/* Método de pago */}
           <section className="rounded-2xl border border-gray-200 bg-white p-6">
             <h2 className="text-lg font-semibold mb-5">Método de pago</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <label
+                className={`relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border-2 p-5 transition-all has-[:checked]:shadow-lg ${
+                  paymentMethod === "mercado-pago"
+                    ? "border-[#009EE3] bg-sky-50/50 shadow-md"
+                    : "border-gray-200 hover:border-gray-300 bg-gray-50/50"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="payment"
+                  value="mercado-pago"
+                  checked={paymentMethod === "mercado-pago"}
+                  onChange={() => setPaymentMethod("mercado-pago")}
+                  className="sr-only"
+                />
+                <div className="flex items-start gap-4">
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+                    paymentMethod === "mercado-pago" ? "bg-[#009EE3] text-white" : "bg-white text-[#009EE3] shadow-sm"
+                  }`}>
+                    <ShoppingBag size={24} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-gray-900">Mercado Pago</p>
+                    <p className="mt-0.5 text-sm font-medium text-[#009EE3]">Tarjeta · PSE · Nequi · Efecty</p>
+                    <p className="mt-2 text-xs text-gray-500">Todos los métodos de pago en un solo lugar. Seguro y rápido.</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2">
+                  <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">Recomendado</span>
+                </div>
+              </label>
               <label
                 className={`relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border-2 p-5 transition-all has-[:checked]:shadow-lg ${
                   paymentMethod === "wompi"
@@ -264,12 +325,22 @@ export default function CheckoutPage() {
               type="submit"
               disabled={loading}
               className={`mt-6 w-full rounded-xl py-4 font-bold text-white disabled:opacity-50 transition-all ${
-                paymentMethod === "wompi"
-                  ? "bg-indigo-500 hover:bg-indigo-600"
-                  : "bg-emerald-500 hover:bg-emerald-600"
+                paymentMethod === "mercado-pago"
+                  ? "bg-[#009EE3] hover:bg-[#0087C9]"
+                  : paymentMethod === "wompi"
+                    ? "bg-indigo-500 hover:bg-indigo-600"
+                    : "bg-emerald-500 hover:bg-emerald-600"
               }`}
             >
-              {loading ? "Procesando..." : `Pagar con ${paymentMethod === "wompi" ? "Wompi" : "ADDI"}`}
+              {loading
+                ? "Procesando..."
+                : `Pagar con ${
+                    paymentMethod === "mercado-pago"
+                      ? "Mercado Pago"
+                      : paymentMethod === "wompi"
+                        ? "Wompi"
+                        : "ADDI"
+                  }`}
             </button>
           </section>
         </form>

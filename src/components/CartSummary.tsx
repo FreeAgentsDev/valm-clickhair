@@ -105,7 +105,7 @@ export default function CartSummary() {
           className="flex w-full items-center justify-center gap-2 rounded-xl py-4 font-bold text-white transition-all hover:opacity-95 shadow-md"
           style={{ backgroundColor: primaryBrand.primaryColor }}
         >
-          Ir a pagar con Wompi o ADDI
+          Ir a pagar
         </Link>
       </div>
     </div>

@@ -86,7 +86,7 @@ export interface Order {
   subtotal: number;
   shippingCost: number;
   total: number;
-  paymentMethod: "wompi" | "addi";
+  paymentMethod: "wompi" | "addi" | "mercado-pago";
   status: "pending" | "paid" | "processing" | "shipped" | "delivered";
   createdAt: string;
 }

@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, MessageCircle, Shield, Truck } from "lucide-react";
 import Header from "@/components/Header";
+import AddToCartButton from "@/components/AddToCartButton";
 import { getProductById } from "@/lib/db";
 import ProductDetailClient from "./ProductDetailClient";
+import type { Product } from "@/types";
 
 export const revalidate = 60;
 
@@ -73,11 +75,24 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
             {/* CTA */}
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <AddToCartButton
+                product={{
+                  id: String(product.id),
+                  brand: "valm-beauty",
+                  name: product.nombre,
+                  description: product.descripcion || "",
+                  price: discountedPrice,
+                  image: product.images[0] || "/logos/logo.png",
+                  images: product.images,
+                  category: product.categoria,
+                  stock: 99,
+                } satisfies Product}
+              />
               <a
                 href={`https://wa.me/573104077106?text=${encodeURIComponent(`Hola! Me interesa: ${product.nombre} - ${formatPrice(discountedPrice)}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 inline-flex items-center justify-center gap-2 bg-[#E93B3C] text-white px-6 py-4 rounded-xl font-bold text-sm transition-all hover:shadow-lg hover:shadow-[#E93B3C]/25 hover:scale-[1.02]"
+                className="flex-1 inline-flex items-center justify-center gap-2 border-2 border-[#E93B3C] text-[#E93B3C] px-6 py-4 rounded-xl font-bold text-sm transition-all hover:bg-[#E93B3C]/5"
               >
                 <MessageCircle size={18} /> Pedir por WhatsApp
               </a>
@@ -89,7 +104,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 <Shield size={18} className="text-[#E93B3C] shrink-0" />
                 <div>
                   <p className="text-xs font-bold text-gray-900">Pago seguro</p>
-                  <p className="text-[10px] text-gray-400">Wompi, ADDI, Nequi</p>
+                  <p className="text-[10px] text-gray-400">Mercado Pago, Wompi, ADDI</p>
                 </div>
               </div>
               <div className="flex items-center gap-2.5 rounded-xl bg-[#FDF2F4] border border-[#F6BCCB]/30 p-3.5">
