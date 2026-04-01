@@ -27,39 +27,28 @@ export default function ProductCard({ product }: ProductCardProps) {
     }).format(price);
 
   return (
-    <article
-      className="group relative flex flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-      style={{
-        borderColor: `${brand.primaryColor}30`,
-      }}
-    >
+    <article className="group relative flex flex-col overflow-hidden rounded-2xl bg-white border-2 border-brand-pink/30 transition-all duration-300 hover:shadow-xl hover:shadow-brand-pink/15 hover:-translate-y-1 hover:border-brand-red/30">
       <Link href={`/${product.brand}/producto/${product.id}`} className="flex-1">
-        <div className="aspect-square relative overflow-hidden bg-gray-50">
+        <div className="aspect-square relative overflow-hidden bg-brand-rose">
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
           />
-          <span
-            className="absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-medium text-white shadow-md"
-            style={{ backgroundColor: brand.primaryColor }}
-          >
+          <span className="absolute top-3 left-3 rounded-full bg-brand-red px-3 py-1 text-xs font-semibold text-white shadow-md">
             {brand.name}
           </span>
         </div>
         <div className="flex flex-1 flex-col p-4 sm:p-5">
-          <h3 className="font-semibold text-gray-900 line-clamp-2 mb-1">
+          <h3 className="font-bold text-gray-900 text-sm sm:text-base line-clamp-2 mb-1 tracking-tight">
             {product.name}
           </h3>
-          <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+          <p className="text-xs sm:text-sm text-gray-400 line-clamp-2 mb-3">
             {product.description}
           </p>
-          <p
-            className="mt-auto text-lg font-bold"
-            style={{ color: brand.primaryColor }}
-          >
+          <p className="mt-auto text-lg sm:text-xl font-extrabold text-brand-red">
             {formatPrice(product.price)}
           </p>
         </div>
@@ -72,20 +61,19 @@ export default function ProductCard({ product }: ProductCardProps) {
           setTimeout(() => setJustAdded(false), FEEDBACK_DURATION_MS);
         }}
         disabled={justAdded}
-        className="mx-4 mb-4 flex items-center justify-center gap-2 rounded-xl py-3 font-medium text-white transition-all duration-300 hover:opacity-90 shadow-md disabled:pointer-events-none"
-        style={{ backgroundColor: brand.primaryColor }}
+        className="mx-4 mb-4 flex items-center justify-center gap-2 rounded-xl py-3 font-semibold text-sm text-white transition-all duration-300 hover:opacity-90 disabled:pointer-events-none bg-brand-red hover:shadow-lg hover:shadow-brand-red/25"
       >
         {justAdded ? (
           <>
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/25 animate-scale-in">
               <Check size={14} strokeWidth={3} />
             </span>
-            <span>¡Añadido!</span>
+            <span>Agregado</span>
           </>
         ) : (
           <>
-            <ShoppingCart size={18} />
-            Agregar al carrito
+            <ShoppingCart size={16} />
+            Agregar
           </>
         )}
       </button>

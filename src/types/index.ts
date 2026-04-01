@@ -45,6 +45,31 @@ export interface Product {
   dimensions?: { width: number; height: number; length: number }; // cm
 }
 
+/** Configuración del popup de anuncio (admin) */
+export interface PopupConfig {
+  enabled: boolean;
+  title?: string;
+  subtitle?: string;
+  content?: string;
+  image?: string;
+  images?: string[];
+  badge?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  cta2Text?: string;
+  cta2Url?: string;
+  bgColor?: string;
+}
+
+/** Contenido editable de marca (admin) */
+export interface BrandContent {
+  brand: BrandSlug;
+  description?: string;
+  brandsCarried?: string[];
+  categories?: string[];
+  highlights?: string[];
+}
+
 export interface CartItem {
   product: Product;
   quantity: number;
@@ -67,7 +92,7 @@ export interface Order {
   subtotal: number;
   shippingCost: number;
   total: number;
-  paymentMethod: "wompi" | "addi";
+  paymentMethod: "wompi" | "addi" | "mercado-pago";
   status: "pending" | "paid" | "processing" | "shipped" | "delivered";
   createdAt: string;
 }

@@ -3,8 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { X, Home, Instagram, ShoppingCart } from "lucide-react";
-import { RoundLogo } from "@/components/ui/RoundLogo";
+import { X, Home, Instagram, ShoppingCart, Lock } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { BRANDS } from "@/lib/brands";
 import type { BrandSlug } from "@/types";
@@ -19,7 +18,6 @@ interface SidebarProps {
 
 const BRAND_NAV_LINKS = [
   { href: "/valm-beauty", label: "Valm Beauty", brand: "valm-beauty" as BrandSlug },
-  { href: "/click-hair", label: "Click Hair", brand: "click-hair" as BrandSlug },
 ] as const;
 
 export function Sidebar({ isOpen, isClosing, onClose, onLinkClick, brand }: SidebarProps) {
@@ -104,25 +102,13 @@ export function Sidebar({ isOpen, isClosing, onClose, onLinkClick, brand }: Side
             onClick={onLinkClick}
             className="flex min-w-0 flex-1 items-center gap-3 truncate"
           >
-            <div className="flex shrink-0 -space-x-2">
-              <RoundLogo
-                src={BRANDS["valm-beauty"].logo}
-                alt=""
-                size={36}
-                ring={false}
-                className="border-2 border-white shadow"
-              />
-              <RoundLogo
-                src={BRANDS["click-hair"].logo}
-                alt=""
-                size={36}
-                ring={false}
-                className="border-2 border-white shadow"
-              />
-            </div>
-            <span className="truncate text-base font-bold text-gray-900">
-              Tienda Virtual
-            </span>
+            <Image
+              src="/logos/logo-navbar.svg"
+              alt="Valm Beauty"
+              width={130}
+              height={44}
+              className="h-9 w-auto object-contain"
+            />
           </Link>
           <button
             ref={closeButtonRef}
@@ -177,9 +163,7 @@ export function Sidebar({ isOpen, isClosing, onClose, onLinkClick, brand }: Side
                       style={{
                         backgroundColor: isActive
                           ? "rgba(255,255,255,0.25)"
-                          : brandData?.primaryColor === "#D62839"
-                            ? "#FDF2F4"
-                            : "#F5F0FA",
+                          : "#FDF2F4",
                       }}
                     >
                       <Image
@@ -211,6 +195,18 @@ export function Sidebar({ isOpen, isClosing, onClose, onLinkClick, brand }: Side
                 </a>
               </li>
             )}
+            <li>
+              <Link
+                href="/admin/login"
+                onClick={onLinkClick}
+                className="flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3.5 font-medium text-gray-600 transition-colors hover:bg-gray-50 active:bg-gray-100"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-600">
+                  <Lock size={20} strokeWidth={2} aria-hidden />
+                </span>
+                Admin
+              </Link>
+            </li>
           </ul>
         </nav>
 
@@ -221,7 +217,7 @@ export function Sidebar({ isOpen, isClosing, onClose, onLinkClick, brand }: Side
             onClick={onLinkClick}
             className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl py-4 font-semibold text-white transition-opacity hover:opacity-95 active:opacity-90"
             style={{
-              backgroundColor: currentBrand?.primaryColor ?? "#D62839",
+              backgroundColor: currentBrand?.primaryColor ?? "#E93B3C",
             }}
           >
             <ShoppingCart size={22} strokeWidth={2.5} aria-hidden />

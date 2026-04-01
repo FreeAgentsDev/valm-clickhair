@@ -40,7 +40,7 @@ export default function CartToast() {
           <Link
             href="/cart"
             onClick={clearLastAdded}
-            className="mt-1.5 inline-flex items-center gap-1 text-sm font-medium text-[#D62839] hover:underline"
+            className="mt-1.5 inline-flex items-center gap-1 text-sm font-medium text-brand-red hover:underline"
           >
             <ShoppingCart size={16} />
             Ver carrito

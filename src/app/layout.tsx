@@ -3,6 +3,8 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import CartToast from "@/components/CartToast";
+import PopupAnnouncement from "@/components/PopupAnnouncement";
+import DataInitializer from "@/components/admin/DataInitializer";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -14,44 +16,45 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#D62839",
+  themeColor: "#E93B3C",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://valm-ecommerce.vercel.app"),
   title: {
-    default: "Valm Beauty & Click Hair | Belleza y Cuidado Capilar en Manizales",
-    template: "%s | Valm Beauty & Click Hair",
+    default: "Valm Beauty | Belleza y Cuidado Personal en Manizales",
+    template: "%s | Valm Beauty",
   },
   description:
-    "Tienda virtual de belleza en Manizales. Valm Beauty: skincare, perfumes capilares, exfoliantes Walaky, Girly, Olé, Fresa Morada. Click Hair: perfumes para cabello, miel, mantequillas con glitter. Envíos a todo Colombia 🇨🇴",
+    "Tienda virtual de belleza en Manizales. Skincare, perfumes capilares, exfoliantes, cuidado corporal. Marcas: Walaky, Girly, Olé, Fresa Morada. +100 productos originales. Envíos a todo Colombia.",
   keywords: [
     "belleza Manizales",
     "skincare Manizales",
     "perfumes capilares",
-    "Click Hair Manizales",
     "Valm Beauty",
     "cuidado capilar Colombia",
     "Walaky",
     "Girly",
     "cosméticos Manizales",
+    "productos de belleza Colombia",
+    "tienda de belleza online",
   ],
-  authors: [{ name: "Valm Beauty & Click Hair", url: "https://www.instagram.com/valm_beauty_mzl" }],
+  authors: [{ name: "Valm Beauty", url: "https://www.instagram.com/valm_beauty_mzl" }],
   creator: "Valm Beauty",
   openGraph: {
     type: "website",
     locale: "es_CO",
     url: "/",
-    siteName: "Valm Beauty & Click Hair",
-    title: "Valm Beauty & Click Hair | Belleza y Cuidado Capilar en Manizales",
+    siteName: "Valm Beauty",
+    title: "Valm Beauty | Belleza y Cuidado Personal en Manizales",
     description:
-      "Tienda virtual de belleza en Manizales. Productos de Valm Beauty y Click Hair. Envíos a todo Colombia.",
-    images: [{ url: "/logos/valmlogo.png", width: 512, height: 512, alt: "Valm Beauty Logo" }],
+      "Tienda virtual de belleza en Manizales. +100 productos originales. Envíos a todo Colombia.",
+    images: [{ url: "/logos/logo.png", width: 1440, height: 480, alt: "Valm Beauty" }],
   },
   twitter: {
     card: "summary",
-    title: "Valm Beauty & Click Hair | Belleza en Manizales",
-    description: "Tienda virtual de belleza. Productos Valm Beauty y Click Hair. Envíos a Colombia.",
+    title: "Valm Beauty | Belleza en Manizales",
+    description: "Tienda virtual de belleza. +100 productos originales con envíos a todo Colombia.",
   },
   robots: {
     index: true,
@@ -75,11 +78,11 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    name: "Valm Beauty & Click Hair",
+    name: "Valm Beauty",
     description:
-      "Tienda virtual de belleza y cuidado capilar en Manizales. Productos Valm Beauty y Click Hair. Envíos a todo Colombia.",
+      "Tienda virtual de belleza y cuidado personal en Manizales. +100 productos originales. Envíos a todo Colombia.",
     url: "https://valm-ecommerce.vercel.app",
-    image: "https://valm-ecommerce.vercel.app/logos/valmlogo.png",
+    image: "https://valm-ecommerce.vercel.app/logos/logo.png",
     telephone: "+57-310-407-7106",
     address: {
       "@type": "PostalAddress",
@@ -110,6 +113,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <CartProvider>
+          <DataInitializer />
+          <PopupAnnouncement />
           <CartToast />
           {children}
         </CartProvider>

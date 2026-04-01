@@ -1,304 +1,390 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Sparkles, Truck, Shield, MessageCircle } from "lucide-react";
+import {
+  Sparkles,
+  Truck,
+  Shield,
+  MessageCircle,
+  ArrowRight,
+  Star,
+  Heart,
+  Gift,
+  Droplets,
+  Flower2,
+  Quote,
+  Instagram,
+} from "lucide-react";
 import { BRANDS } from "@/lib/brands";
 import Header from "@/components/Header";
+import DbProductCard from "@/components/DbProductCard";
+import AnimateOnScroll from "@/components/AnimateOnScroll";
+import { getFeaturedProducts } from "@/lib/db";
+import { getAdminHero } from "@/lib/admin-storage";
 
-export default function Home() {
+export const revalidate = 60;
+
+const DEFAULT_HERO = {
+  title: "Tu destino de belleza",
+  titleHighlight: "en Colombia",
+  subtitle: "Skincare, cuidado capilar y corporal. Productos originales con envios a todo Colombia.",
+  badge: "Belleza & Cuidado Profesional",
+  ctaText: "Ver catalogo",
+  ctaWhatsappText: "Escribenos",
+  aboutTitle: "Belleza que se siente, se huele y se vive",
+  aboutText: "Desde Manizales para toda Colombia. Productos 100% originales de Walaky, Girly, Ole y Fresa Morada con envios seguros y asesoria personalizada.",
+  catalogTitle: "Explora el catalogo",
+  catalogSubtitle: "Mas de 170 productos originales para tu belleza y cuidado personal.",
+  categoriesTitle: "Encuentra lo que buscas",
+};
+
+export default async function Home() {
+  const featuredProducts = await getFeaturedProducts(8);
+  const heroContent = getAdminHero() ?? DEFAULT_HERO;
+  const hero = { ...DEFAULT_HERO, ...heroContent };
+
   return (
     <div className="min-h-screen bg-white font-sans">
       <Header />
 
       <main>
-        {/* Hero con contraste - optimizado para SEO y conversión */}
+        {/* ════════════ HERO ════════════ */}
         <section
-          className="relative overflow-hidden px-4 py-16 sm:py-24"
+          className="relative overflow-hidden px-4 py-20 sm:py-28 lg:py-36"
+          style={{ background: "linear-gradient(180deg, #F6BCCB 0%, #F9CDD7 60%, #FDF2F4 100%)" }}
           aria-labelledby="hero-title"
         >
-          <div
-            className="absolute inset-0 opacity-95"
-            style={{
-              background: "linear-gradient(135deg, #FDF2F4 0%, #F5F0FA 50%, #EFF6FF 100%)",
-            }}
+          {/* Decoración brandbook */}
+          <img
+            src="/logos/decoracion-logo.svg"
+            alt=""
+            aria-hidden="true"
+            className="absolute top-0 left-0 w-full h-full object-cover pointer-events-none select-none"
           />
+
           <div className="relative mx-auto max-w-7xl">
-            <div className="flex flex-col items-center gap-10 text-center lg:flex-row lg:gap-14 lg:text-left">
-              <div className="flex items-center gap-4" aria-hidden="true">
-                <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-xl ring-2 ring-[#D62839]/20">
-                  <Image
-                    src={BRANDS["valm-beauty"].logo}
-                    alt="Valm Beauty - Skincare y belleza en Manizales"
-                    fill
-                    className="object-cover"
-                    sizes="96px"
-                    priority
-                  />
-                </div>
-                <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-xl ring-2 ring-[#9B8FD9]/20">
-                  <Image
-                    src={BRANDS["click-hair"].logo}
-                    alt="Click Hair - Cuidado capilar y perfumes para cabello"
-                    fill
-                    className="object-cover"
-                    sizes="96px"
-                    priority
-                  />
-                </div>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-500 mb-3 tracking-wide uppercase">
-                  Cra 23A # 60-11 Tienda Virtual · Manizales
-                </p>
-                <h1
-                  id="hero-title"
-                  className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"
-                >
-                  Belleza y cuidado en{" "}
-                  <span className="text-[#D62839]">Manizales</span>
-                </h1>
-                <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-gray-600 lg:mx-0">
-                  Explora las colecciones de Valm Beauty y Click Hair. Productos de calidad con envíos a todo Colombia 🇨🇴
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Sección marcas - Landing descriptiva */}
-        <section
-          className="border-y border-gray-100 bg-gray-50/50 px-4 py-16 sm:py-20"
-          aria-labelledby="brands-heading"
-        >
-          <div className="mx-auto max-w-7xl">
-            <h2
-              id="brands-heading"
-              className="text-center text-2xl font-bold text-gray-900 mb-4 sm:text-3xl"
-            >
-              Nuestras marcas
-            </h2>
-            <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto text-base leading-relaxed">
-              Dos marcas que amamos, un solo lugar. Productos para el cuidado de tu piel, cabello y cuerpo.
-            </p>
-
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* Valm Beauty - card con contraste */}
-            <div
-              className="group relative overflow-hidden rounded-3xl border-2 p-8 transition-all duration-300 hover:shadow-xl"
-              style={{
-                borderColor: "#F5A6B8",
-                background: "linear-gradient(180deg, #FFF5F7 0%, #ffffff 100%)",
-                boxShadow: "0 4px 20px rgba(214, 40, 57, 0.08)",
-              }}
-            >
-              <Link href="/valm-beauty" className="block">
-                <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left gap-6">
-                  <div
-                    className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-lg ring-2 ring-[#D62839]/30"
-                    style={{ backgroundColor: "#FDF2F4" }}
-                  >
-                    <Image
-                      src={BRANDS["valm-beauty"].logo}
-                      alt="Valm Beauty"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3
-                      className="text-2xl font-bold tracking-tight"
-                      style={{ color: BRANDS["valm-beauty"].primaryColor }}
-                    >
-                      Valm Beauty
-                    </h3>
-                    <p className="mt-2 text-gray-600 leading-relaxed">
-                      Tienda multimarca: Walaky, Girly, Olé, Fresa Morada. Skincare, perfumes capilares,
-                      exfoliantes y productos para el cuidado facial y corporal.
-                    </p>
-                    <p className="mt-4 text-sm font-medium text-gray-500 flex items-center justify-center sm:justify-start gap-1">
-                      <Instagram size={16} />
-                      @valm_beauty_mzl
-                    </p>
-                    <span className="mt-4 inline-block font-semibold text-[#D62839] group-hover:underline">
-                      Ver productos →
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-            {/* Click Hair - card con contraste */}
-            <div
-              className="group relative overflow-hidden rounded-3xl border-2 p-8 transition-all duration-300 hover:shadow-xl"
-              style={{
-                borderColor: "#B8D4E8",
-                background: "linear-gradient(180deg, #F8F5FF 0%, #ffffff 100%)",
-                boxShadow: "0 4px 20px rgba(155, 143, 217, 0.08)",
-              }}
-            >
-              <Link href="/click-hair" className="block">
-                <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left gap-6">
-                  <div
-                    className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-lg ring-2 ring-[#9B8FD9]/30"
-                    style={{ backgroundColor: "#F5F0FA" }}
-                  >
-                    <Image
-                      src={BRANDS["click-hair"].logo}
-                      alt="Click Hair"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3
-                      className="text-2xl font-bold tracking-tight"
-                      style={{ color: BRANDS["click-hair"].primaryColor }}
-                    >
-                      Click Hair
-                    </h3>
-                    <p className="mt-2 text-gray-600 leading-relaxed">
-                      Cuidado capilar y corporal. Perfumes para el cabello en 7 aromas, línea de miel,
-                      mantequillas con glitter y rutinas depilatorias. Productos que hacen que tu cabello se vea, sienta y huela impecable.
-                    </p>
-                    <p className="mt-4 text-sm font-medium text-gray-500 flex items-center justify-center sm:justify-start gap-1">
-                      <Instagram size={16} />
-                      @click_hair_manizales
-                    </p>
-                    <span className="mt-4 inline-block font-semibold text-[#9B8FD9] group-hover:underline">
-                      Ver productos →
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-        {/* Tarjetas rápidas de marcas */}
-        <section className="px-4 py-12 sm:py-16" aria-label="Acceso rápido a marcas">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Link
-              href="/valm-beauty"
-              className="group flex items-center gap-6 rounded-2xl border-2 border-[#F5A6B8]/60 bg-white p-6 shadow-sm transition-all hover:shadow-lg hover:border-[#D62839]/40"
-            >
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-[#F5A6B8]/50 shadow-md">
+            <div className="flex flex-col items-center text-center">
+              {/* Logo wordmark */}
+              <div className="mb-3 animate-slide-up" style={{ animationDelay: "0.05s" }} aria-hidden="true">
                 <Image
-                  src={BRANDS["valm-beauty"].logo}
+                  src="/logos/logo.svg"
                   alt="Valm Beauty"
-                  fill
-                  className="object-cover transition-transform group-hover:scale-105"
+                  width={400}
+                  height={134}
+                  className="h-32 sm:h-40 w-auto object-contain mix-blend-multiply"
+                  priority
                 />
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-[#D62839]">Valm Beauty</h3>
-                <p className="text-sm text-gray-600">Skincare, perfumes y cuidado corporal</p>
-                <span className="mt-2 inline-block text-sm font-medium text-[#D62839] group-hover:underline">
-                  Explorar →
-                </span>
-              </div>
-            </Link>
-            <Link
-              href="/click-hair"
-              className="group flex items-center gap-6 rounded-2xl border-2 border-[#B8D4E8]/60 bg-white p-6 shadow-sm transition-all hover:shadow-lg hover:border-[#9B8FD9]/40"
-            >
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-[#B8D4E8]/50 shadow-md">
-                <Image
-                  src={BRANDS["click-hair"].logo}
-                  alt="Click Hair"
-                  fill
-                  className="object-cover transition-transform group-hover:scale-105"
-                />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-[#9B8FD9]">Click Hair</h3>
-                <p className="text-sm text-gray-600">Perfumes capilares, miel y cuerpo</p>
-                <span className="mt-2 inline-block text-sm font-medium text-[#9B8FD9] group-hover:underline">
-                  Explorar →
-                </span>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
 
-        {/* Beneficios / Features */}
-        <section
-          className="border-t border-gray-200 bg-gray-50 px-4 py-16 sm:py-20"
-          aria-labelledby="benefits-heading"
-        >
-          <div className="mx-auto max-w-7xl">
-            <h2 id="benefits-heading" className="sr-only">
-              Beneficios de comprar con nosotros
-            </h2>
-            <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
-              <article className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
-                <Shield size={28} />
-              </div>
-              <h3 className="font-bold text-gray-900">Pago seguro</h3>
-              <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                Wompi y ADDI. Tarjeta, PSE, Nequi o cuotas.
+              <p className="inline-flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-5 py-2 text-[#E93B3C] text-xs sm:text-sm font-bold tracking-[0.2em] uppercase mb-6 border border-[#F6BCCB]/50 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+                <Sparkles size={14} /> {hero.badge}
               </p>
-            </article>
-            <article className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
-                <MessageCircle size={28} />
-              </div>
-              <h3 className="font-bold text-gray-900">WhatsApp</h3>
-              <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                Envía tu carrito directo. Respuesta rápida.
+
+              <h1
+                id="hero-title"
+                className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-gray-900 max-w-4xl animate-slide-up"
+                style={{ lineHeight: "1.05", animationDelay: "0.35s" }}
+              >
+                {hero.title}
+                <span className="block text-gradient-shimmer mt-2">{hero.titleHighlight}</span>
+              </h1>
+
+              <p className="mt-6 max-w-xl text-base sm:text-lg text-gray-600 leading-relaxed animate-slide-up" style={{ animationDelay: "0.5s" }}>
+                {hero.subtitle}
               </p>
-            </article>
-            <article className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
-                <Truck size={28} />
+
+              <div className="mt-10 flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: "0.65s" }}>
+                <a
+                  href="#catalogo"
+                  className="group inline-flex items-center justify-center gap-2 bg-[#E93B3C] text-white px-8 py-4 rounded-full font-bold text-sm sm:text-base transition-all hover:shadow-xl hover:shadow-[#E93B3C]/30 hover:scale-[1.03]"
+                >
+                  {hero.ctaText}
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                </a>
+                <a
+                  href="https://wa.me/573104077106"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center justify-center gap-2 bg-white text-[#E93B3C] px-8 py-4 rounded-full font-bold text-sm sm:text-base transition-all hover:shadow-lg border-2 border-[#E93B3C]/20 hover:border-[#E93B3C]/50"
+                >
+                  <MessageCircle size={18} /> {hero.ctaWhatsappText}
+                </a>
               </div>
-              <h3 className="font-bold text-gray-900">Envíos</h3>
-              <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                Skydropx · A todo Colombia.
-              </p>
-            </article>
-            <article className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
-                <Sparkles size={28} />
+
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-gray-500 text-xs font-semibold tracking-wide uppercase animate-slide-up" style={{ animationDelay: "0.8s" }}>
+                <span className="flex items-center gap-1.5"><Shield size={14} className="text-[#E93B3C]" /> Pago Seguro</span>
+                <span className="flex items-center gap-1.5"><Truck size={14} className="text-[#E93B3C]" /> Envio Nacional</span>
+                <span className="flex items-center gap-1.5"><Star size={14} className="text-[#E93B3C]" /> 100% Original</span>
               </div>
-              <h3 className="font-bold text-gray-900">Marcas premium</h3>
-              <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                Valm Beauty y Click Hair. Calidad garantizada.
-              </p>
-            </article>
+            </div>
           </div>
-        </div>
         </section>
+
+        {/* ════════════ CATEGORIAS ════════════ */}
+        <section className="bg-white px-4 py-20 sm:py-24" aria-labelledby="categories-heading">
+          <div className="mx-auto max-w-7xl">
+            <AnimateOnScroll className="text-center mb-14">
+              <p className="text-[#E93B3C] text-sm font-bold tracking-[0.15em] uppercase mb-3">Categorias</p>
+              <h2 id="categories-heading" className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+                {hero.categoriesTitle}
+              </h2>
+            </AnimateOnScroll>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[
+                { icon: Droplets, label: "Skincare", desc: "Cuidado facial" },
+                { icon: Flower2, label: "Capilares", desc: "Perfumes y mas" },
+                { icon: Sparkles, label: "Exfoliantes", desc: "Cuerpo y rostro" },
+                { icon: Heart, label: "Corporales", desc: "Hidratacion" },
+                { icon: Star, label: "Maquillaje", desc: "Looks perfectos" },
+                { icon: Gift, label: "Kits", desc: "Rutinas completas" },
+              ].map((cat, i) => (
+                <AnimateOnScroll key={cat.label} delay={i * 0.08} direction="up">
+                  <a
+                    href="#catalogo"
+                    className="group flex flex-col items-center text-center rounded-2xl bg-[#FDF2F4] border-2 border-[#F6BCCB]/30 p-6 sm:p-7 transition-all duration-300 hover:border-[#E93B3C]/40 hover:shadow-lg hover:shadow-[#F6BCCB]/20 hover:-translate-y-1 cursor-pointer"
+                  >
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F6BCCB]/40 text-[#E93B3C] mb-4 transition-all duration-300 group-hover:bg-[#E93B3C] group-hover:text-white group-hover:scale-110 group-hover:rounded-xl">
+                      <cat.icon size={24} />
+                    </div>
+                    <h3 className="text-sm font-bold text-gray-900">{cat.label}</h3>
+                    <p className="text-xs text-gray-400 mt-1">{cat.desc}</p>
+                  </a>
+                </AnimateOnScroll>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════ PRODUCTOS DESTACADOS ════════════ */}
+        <section id="catalogo" className="scroll-mt-20 px-4 py-20 sm:py-24 bg-[#FDF2F4]" aria-labelledby="catalog-heading">
+          <div className="mx-auto max-w-7xl">
+            <AnimateOnScroll className="text-center mb-12">
+              <p className="text-[#E93B3C] text-sm font-bold tracking-[0.15em] uppercase mb-3">Nuestros Productos</p>
+              <h2 id="catalog-heading" className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+                {hero.catalogTitle}
+              </h2>
+              <p className="mt-4 text-gray-500 max-w-md mx-auto">
+                {hero.catalogSubtitle}
+              </p>
+            </AnimateOnScroll>
+
+            <AnimateOnScroll delay={0.1}>
+              <div className="grid gap-5 grid-cols-2 lg:grid-cols-4">
+                {featuredProducts.map((product) => (
+                  <DbProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </AnimateOnScroll>
+
+            <AnimateOnScroll delay={0.2} className="text-center mt-12">
+              <Link
+                href="/catalogo"
+                className="group inline-flex items-center gap-2.5 bg-[#E93B3C] text-white px-8 py-4 rounded-full font-bold text-sm sm:text-base transition-all hover:shadow-xl hover:shadow-[#E93B3C]/30 hover:scale-[1.03]"
+              >
+                Ver catalogo completo
+                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+              </Link>
+            </AnimateOnScroll>
+          </div>
+        </section>
+
+        {/* ════════════ SOBRE NOSOTROS ════════════ */}
+        <section className="px-4 py-20 sm:py-24 bg-white overflow-hidden" aria-labelledby="about-heading">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {/* Collage */}
+              <AnimateOnScroll direction="left">
+                <div className="relative grid grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border-2 border-[#F6BCCB]/30 shadow-md group">
+                      <Image src="/products/valm/valm_beauty_mzl_DUCSgsDDavs_1.jpg" alt="Skincare Valm Beauty" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    </div>
+                    <div className="relative aspect-square overflow-hidden rounded-2xl border-2 border-[#F6BCCB]/30 shadow-md group">
+                      <Image src="/products/valm/valm_beauty_mzl_DUCSgsDDavs_2.jpg" alt="Productos de belleza" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    </div>
+                  </div>
+                  <div className="space-y-3 sm:space-y-4 pt-8">
+                    <div className="relative aspect-square overflow-hidden rounded-2xl border-2 border-[#F6BCCB]/30 shadow-md group">
+                      <Image src="/products/valm/valm_beauty_mzl_DUCSgsDDavs_5.jpg" alt="Cepillos y accesorios" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    </div>
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border-2 border-[#F6BCCB]/30 shadow-md group">
+                      <Image src="/products/valm/valm_beauty_mzl_DUCSgsDDavs_3.jpg" alt="Cuidado capilar" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    </div>
+                  </div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-float">
+                    <div className="bg-[#E93B3C] text-white rounded-full h-20 w-20 sm:h-24 sm:w-24 flex flex-col items-center justify-center shadow-xl ring-4 ring-white animate-pulse-glow">
+                      <span className="text-2xl sm:text-3xl font-extrabold leading-none">100+</span>
+                      <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider mt-0.5">productos</span>
+                    </div>
+                  </div>
+                </div>
+              </AnimateOnScroll>
+
+              {/* Copy */}
+              <AnimateOnScroll direction="right" delay={0.15}>
+                <div>
+                  <p className="text-[#E93B3C] text-sm font-bold tracking-[0.15em] uppercase mb-3">Sobre Nosotros</p>
+                  <h2 id="about-heading" className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">
+                    {hero.aboutTitle}
+                  </h2>
+                  <p className="mt-4 text-gray-600 leading-relaxed">
+                    {hero.aboutText}
+                  </p>
+
+                  <div className="mt-7 grid grid-cols-3 gap-3">
+                    {[
+                      { num: "100+", label: "Productos" },
+                      { num: "8+", label: "Marcas" },
+                      { num: "100%", label: "Originales" },
+                    ].map((stat) => (
+                      <div key={stat.label} className="text-center p-4 rounded-2xl bg-[#FDF2F4] border border-[#F6BCCB]/30">
+                        <p className="text-2xl sm:text-3xl font-extrabold text-[#E93B3C]">{stat.num}</p>
+                        <p className="text-xs text-gray-500 font-medium mt-1">{stat.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <a
+                    href="#catalogo"
+                    className="mt-7 group inline-flex items-center gap-2 bg-[#E93B3C] text-white px-7 py-3.5 rounded-full font-bold text-sm transition-all hover:shadow-lg hover:shadow-[#E93B3C]/25 hover:scale-[1.02]"
+                  >
+                    Ver productos <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                  </a>
+                </div>
+              </AnimateOnScroll>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════ TESTIMONIOS ════════════ */}
+        <section className="px-4 py-20 sm:py-24" style={{ background: "linear-gradient(180deg, #FFF5F8 0%, #FDF2F4 100%)" }} aria-labelledby="testimonials-heading">
+          <div className="mx-auto max-w-7xl">
+            <AnimateOnScroll className="text-center mb-14">
+              <p className="text-[#E93B3C] text-sm font-bold tracking-[0.15em] uppercase mb-3">Testimonios</p>
+              <h2 id="testimonials-heading" className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+                Lo que dicen nuestras clientas
+              </h2>
+            </AnimateOnScroll>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                { name: "Carolina M.", text: "Los perfumes capilares son increibles, mi cabello huele espectacular todo el dia. Amo la variedad que tienen." },
+                { name: "Valentina R.", text: "Los exfoliantes Walaky son buenisimos. La atencion por WhatsApp fue super rapida y me asesoraron perfecto." },
+                { name: "Laura G.", text: "La mantequilla con glitter es un descubrimiento! Piel suave, brillante y el aroma dura horas." },
+              ].map((review, i) => (
+                <AnimateOnScroll key={i} delay={i * 0.12} direction="up">
+                  <article className="bg-white rounded-2xl p-7 border-2 border-[#F6BCCB]/30 shadow-sm hover:shadow-lg hover:shadow-[#F6BCCB]/15 transition-all duration-300 hover:-translate-y-1 h-full">
+                    <Quote size={24} className="text-[#F6BCCB] mb-4" />
+                    <p className="text-gray-600 text-sm leading-relaxed mb-5">{review.text}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-bold text-gray-900 text-sm">{review.name}</p>
+                        <p className="text-xs text-gray-400">Clienta verificada</p>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, j) => (
+                          <Star key={j} size={14} className="fill-[#E93B3C] text-[#E93B3C]" />
+                        ))}
+                      </div>
+                    </div>
+                  </article>
+                </AnimateOnScroll>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════ BENEFICIOS ════════════ */}
+        <section className="bg-white px-4 py-20 sm:py-24" aria-labelledby="benefits-heading">
+          <div className="mx-auto max-w-7xl">
+            <AnimateOnScroll className="text-center mb-14">
+              <p className="text-[#E93B3C] text-sm font-bold tracking-[0.15em] uppercase mb-3">Por que elegirnos</p>
+              <h2 id="benefits-heading" className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+                Compra con confianza
+              </h2>
+            </AnimateOnScroll>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { icon: Shield, title: "Pago seguro", desc: "Wompi y ADDI. Tarjeta, PSE, Nequi o cuotas." },
+                { icon: MessageCircle, title: "WhatsApp directo", desc: "Asesoria personalizada y respuesta rapida." },
+                { icon: Truck, title: "Envios nacionales", desc: "A todo Colombia con seguimiento en tiempo real." },
+                { icon: Star, title: "100% Originales", desc: "Marcas premium. Calidad certificada y garantizada." },
+              ].map((b, i) => (
+                <AnimateOnScroll key={b.title} delay={i * 0.1} direction="up">
+                  <article className="group bg-[#FDF2F4] rounded-2xl p-7 border-2 border-[#F6BCCB]/30 transition-all duration-300 hover:border-[#E93B3C]/30 hover:shadow-lg hover:shadow-[#F6BCCB]/15 hover:-translate-y-1 h-full">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F6BCCB]/40 text-[#E93B3C] mb-5 transition-all duration-300 group-hover:bg-[#E93B3C] group-hover:text-white group-hover:scale-110">
+                      <b.icon size={24} />
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-lg">{b.title}</h3>
+                    <p className="mt-2 text-sm text-gray-500 leading-relaxed">{b.desc}</p>
+                  </article>
+                </AnimateOnScroll>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════ CTA FINAL ════════════ */}
+        <AnimateOnScroll direction="scale">
+          <section className="relative overflow-hidden bg-[#E93B3C] px-4 py-16 sm:py-20">
+            <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-[#F6BCCB]/20 blur-3xl" />
+            <div className="relative mx-auto max-w-3xl text-center">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Escribenos por WhatsApp
+              </h2>
+              <p className="mt-4 text-white/80 text-base sm:text-lg">
+                Cra 23A # 60-11 · Manizales, Caldas · Lun-Vie 9:30am - 6:30pm
+              </p>
+              <div className="mt-8 flex justify-center">
+                <a href="https://wa.me/573104077106" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 bg-white text-[#E93B3C] px-10 py-4 rounded-full font-bold text-base transition-all hover:scale-[1.03] hover:shadow-xl">
+                  <MessageCircle size={20} /> Escribenos ahora
+                </a>
+              </div>
+            </div>
+          </section>
+        </AnimateOnScroll>
       </main>
 
-      <footer
-        className="border-t border-gray-200 px-4 py-10 sm:py-12 text-center text-sm text-gray-500 font-sans"
-        role="contentinfo"
-      >
-        <address className="not-italic">
-          <p className="font-semibold text-gray-800">Cra 23A # 60-11 Tienda Virtual</p>
-          <p className="mt-1">Manizales, Caldas · Lunes a Viernes 9:30am - 6:30pm</p>
-        </address>
-        <p className="mt-4">
-          <a
-            href={BRANDS["valm-beauty"].instagramUrl}
-            className="hover:underline font-medium"
-            style={{ color: BRANDS["valm-beauty"].primaryColor }}
-          >
-            @valm_beauty_mzl
-          </a>
-          {" · "}
-          <a
-            href={BRANDS["click-hair"].instagramUrl}
-            className="hover:underline font-medium"
-            style={{ color: BRANDS["click-hair"].primaryColor }}
-          >
-            @click_hair_manizales
-          </a>
-        </p>
-        <p className="mt-2">📲 310 407 7106 · 320 677 0162</p>
+      {/* ════════════ FOOTER ════════════ */}
+      <footer className="bg-[#FDF2F4] border-t border-[#F6BCCB]/30 px-4 py-14 sm:py-16" role="contentinfo">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <div className="mb-4">
+                <Image src="/logos/logo.svg" alt="Valm Beauty" width={130} height={44} className="h-9 w-auto object-contain" />
+              </div>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Belleza y cuidado profesional en Manizales. Productos originales con envios a todo Colombia.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-gray-900 font-bold text-sm mb-4 tracking-wide uppercase">Tienda</h4>
+              <ul className="space-y-2.5">
+                <li><Link href="/valm-beauty" className="text-gray-500 text-sm hover:text-[#E93B3C] transition-colors">Valm Beauty</Link></li>
+                <li><Link href="/catalogo" className="text-gray-500 text-sm hover:text-[#E93B3C] transition-colors">Catalogo</Link></li>
+                <li><Link href="/cart" className="text-gray-500 text-sm hover:text-[#E93B3C] transition-colors">Mi carrito</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-gray-900 font-bold text-sm mb-4 tracking-wide uppercase">Contacto</h4>
+              <ul className="space-y-2.5 text-gray-500 text-sm">
+                <li>310 407 7106</li>
+                <li>Cra 23A # 60-11</li>
+                <li>Manizales, Caldas</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-gray-900 font-bold text-sm mb-4 tracking-wide uppercase">Siguenos</h4>
+              <div className="flex flex-col gap-2.5">
+                <a href={BRANDS["valm-beauty"].instagramUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-gray-500 text-sm hover:text-[#E93B3C] transition-colors">
+                  <Instagram size={16} /> @valm_beauty_mzl
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="mt-12 pt-8 border-t border-[#F6BCCB]/30 text-center">
+            <p className="text-gray-400 text-xs">&copy; {new Date().getFullYear()} Valm Beauty. Todos los derechos reservados.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
