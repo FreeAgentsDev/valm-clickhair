@@ -49,10 +49,16 @@ export interface Product {
 export interface PopupConfig {
   enabled: boolean;
   title?: string;
+  subtitle?: string;
   content?: string;
   image?: string;
+  images?: string[];
+  badge?: string;
   ctaText?: string;
   ctaUrl?: string;
+  cta2Text?: string;
+  cta2Url?: string;
+  bgColor?: string;
 }
 
 /** Contenido editable de marca (admin) */

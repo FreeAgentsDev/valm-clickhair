@@ -19,11 +19,28 @@ import Header from "@/components/Header";
 import DbProductCard from "@/components/DbProductCard";
 import AnimateOnScroll from "@/components/AnimateOnScroll";
 import { getFeaturedProducts } from "@/lib/db";
+import { getAdminHero } from "@/lib/admin-storage";
 
-export const revalidate = 60; // revalidar cada 60s
+export const revalidate = 60;
+
+const DEFAULT_HERO = {
+  title: "Tu destino de belleza",
+  titleHighlight: "en Colombia",
+  subtitle: "Skincare, cuidado capilar y corporal. Productos originales con envios a todo Colombia.",
+  badge: "Belleza & Cuidado Profesional",
+  ctaText: "Ver catalogo",
+  ctaWhatsappText: "Escribenos",
+  aboutTitle: "Belleza que se siente, se huele y se vive",
+  aboutText: "Desde Manizales para toda Colombia. Productos 100% originales de Walaky, Girly, Ole y Fresa Morada con envios seguros y asesoria personalizada.",
+  catalogTitle: "Explora el catalogo",
+  catalogSubtitle: "Mas de 170 productos originales para tu belleza y cuidado personal.",
+  categoriesTitle: "Encuentra lo que buscas",
+};
 
 export default async function Home() {
   const featuredProducts = await getFeaturedProducts(8);
+  const heroContent = getAdminHero() ?? DEFAULT_HERO;
+  const hero = { ...DEFAULT_HERO, ...heroContent };
 
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -59,7 +76,7 @@ export default async function Home() {
               </div>
 
               <p className="inline-flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-full px-5 py-2 text-[#E93B3C] text-xs sm:text-sm font-bold tracking-[0.2em] uppercase mb-6 border border-[#F6BCCB]/50 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-                <Sparkles size={14} /> Belleza &amp; Cuidado Profesional
+                <Sparkles size={14} /> {hero.badge}
               </p>
 
               <h1
@@ -67,12 +84,12 @@ export default async function Home() {
                 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-gray-900 max-w-4xl animate-slide-up"
                 style={{ lineHeight: "1.05", animationDelay: "0.35s" }}
               >
-                Tu destino de belleza
-                <span className="block text-gradient-shimmer mt-2">en Colombia</span>
+                {hero.title}
+                <span className="block text-gradient-shimmer mt-2">{hero.titleHighlight}</span>
               </h1>
 
               <p className="mt-6 max-w-xl text-base sm:text-lg text-gray-600 leading-relaxed animate-slide-up" style={{ animationDelay: "0.5s" }}>
-                Skincare, cuidado capilar y corporal. Productos originales con envios a todo Colombia.
+                {hero.subtitle}
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: "0.65s" }}>
@@ -80,7 +97,7 @@ export default async function Home() {
                   href="#catalogo"
                   className="group inline-flex items-center justify-center gap-2 bg-[#E93B3C] text-white px-8 py-4 rounded-full font-bold text-sm sm:text-base transition-all hover:shadow-xl hover:shadow-[#E93B3C]/30 hover:scale-[1.03]"
                 >
-                  Ver catalogo
+                  {hero.ctaText}
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                 </a>
                 <a
@@ -89,7 +106,7 @@ export default async function Home() {
                   rel="noopener noreferrer"
                   className="group inline-flex items-center justify-center gap-2 bg-white text-[#E93B3C] px-8 py-4 rounded-full font-bold text-sm sm:text-base transition-all hover:shadow-lg border-2 border-[#E93B3C]/20 hover:border-[#E93B3C]/50"
                 >
-                  <MessageCircle size={18} /> Escribenos
+                  <MessageCircle size={18} /> {hero.ctaWhatsappText}
                 </a>
               </div>
 
@@ -108,7 +125,7 @@ export default async function Home() {
             <AnimateOnScroll className="text-center mb-14">
               <p className="text-[#E93B3C] text-sm font-bold tracking-[0.15em] uppercase mb-3">Categorias</p>
               <h2 id="categories-heading" className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-                Encuentra lo que buscas
+                {hero.categoriesTitle}
               </h2>
             </AnimateOnScroll>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -143,10 +160,10 @@ export default async function Home() {
             <AnimateOnScroll className="text-center mb-12">
               <p className="text-[#E93B3C] text-sm font-bold tracking-[0.15em] uppercase mb-3">Nuestros Productos</p>
               <h2 id="catalog-heading" className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-                Explora el catalogo
+                {hero.catalogTitle}
               </h2>
               <p className="mt-4 text-gray-500 max-w-md mx-auto">
-                Mas de 170 productos originales para tu belleza y cuidado personal.
+                {hero.catalogSubtitle}
               </p>
             </AnimateOnScroll>
 
@@ -207,10 +224,10 @@ export default async function Home() {
                 <div>
                   <p className="text-[#E93B3C] text-sm font-bold tracking-[0.15em] uppercase mb-3">Sobre Nosotros</p>
                   <h2 id="about-heading" className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">
-                    Belleza que se siente, se huele y se vive
+                    {hero.aboutTitle}
                   </h2>
                   <p className="mt-4 text-gray-600 leading-relaxed">
-                    Desde Manizales para toda Colombia. Productos 100% originales de Walaky, Girly, Ole y Fresa Morada con envios seguros y asesoria personalizada.
+                    {hero.aboutText}
                   </p>
 
                   <div className="mt-7 grid grid-cols-3 gap-3">

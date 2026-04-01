@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MessageCircle } from "lucide-react";
+import Link from "next/link";
 import Header from "@/components/Header";
 import { getProducts, getCategories } from "@/lib/db";
 import CatalogFilter from "./CatalogFilter";
@@ -55,15 +55,6 @@ export default async function CatalogoPage({
                 </div>
               </div>
 
-              {/* Right: CTA */}
-              <a
-                href="https://wa.me/573104077106"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#E93B3C] px-6 py-3 text-sm font-bold text-white shadow-md shadow-[#E93B3C]/20 transition-all hover:scale-[1.03] hover:shadow-lg self-start sm:self-auto"
-              >
-                <MessageCircle size={16} /> Pedir por WhatsApp
-              </a>
             </div>
           </div>
         </section>
@@ -79,16 +70,14 @@ export default async function CatalogoPage({
         <section className="px-4 pb-16">
           <div className="mx-auto max-w-7xl">
             <div className="rounded-3xl bg-[#FDF2F4] border border-[#F6BCCB]/50 px-8 py-10 text-center">
-              <p className="text-lg font-bold text-gray-900">¿No encuentras lo que buscas?</p>
-              <p className="mt-1 text-gray-500 text-sm">Escribenos y te asesoramos con el producto perfecto.</p>
-              <a
-                href="https://wa.me/573104077106"
-                target="_blank"
-                rel="noopener noreferrer"
+              <p className="text-lg font-bold text-gray-900">¿Ya elegiste tus productos?</p>
+              <p className="mt-1 text-gray-500 text-sm">Agrega al carrito y completa tu compra con Mercado Pago o cuotas ADDI.</p>
+              <Link
+                href="/cart"
                 className="mt-5 inline-flex items-center gap-2 bg-[#E93B3C] text-white px-7 py-3 rounded-full font-bold text-sm transition-all hover:shadow-lg hover:shadow-[#E93B3C]/25 hover:scale-[1.02]"
               >
-                <MessageCircle size={16} /> Escribenos por WhatsApp
-              </a>
+                Ir al carrito
+              </Link>
             </div>
           </div>
         </section>

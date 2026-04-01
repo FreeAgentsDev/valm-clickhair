@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { X } from "lucide-react";
-import { storageService } from "@/lib/storage";
+import { X, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import type { PopupConfig } from "@/types";
 
 const DEFAULT_POPUP: PopupConfig = {
@@ -19,35 +18,34 @@ const DISMISSED_KEY = "popup_dismissed_session";
 export default function PopupAnnouncement() {
   const [config, setConfig] = useState<PopupConfig>(DEFAULT_POPUP);
   const [visible, setVisible] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [imgIdx, setImgIdx] = useState(0);
 
   useEffect(() => {
-    setMounted(true);
+    fetch("/api/admin/popup")
+      .then((res) => res.json())
+      .then((data) => {
+        const cfg = data.config || DEFAULT_POPUP;
+        setConfig(cfg);
+        if (cfg.enabled && !sessionStorage.getItem(DISMISSED_KEY)) {
+          setVisible(true);
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
-    const cfg = storageService.getPopup(DEFAULT_POPUP);
-    setConfig(cfg);
-    if (cfg.enabled && !sessionStorage.getItem(DISMISSED_KEY)) {
-      setVisible(true);
-    }
-  }, [mounted]);
+  const allImages = config.images?.length
+    ? config.images
+    : config.image
+      ? [config.image]
+      : [];
 
-  useEffect(() => {
-    const handler = () => {
-      const cfg = storageService.getPopup(DEFAULT_POPUP);
-      setConfig(cfg);
-      if (!cfg.enabled) setVisible(false);
-    };
-    window.addEventListener("storage-update", handler);
-    return () => window.removeEventListener("storage-update", handler);
-  }, []);
+  const isDark =
+    config.bgColor === "#111111" || config.bgColor === "#E93B3C";
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setVisible(false);
     sessionStorage.setItem(DISMISSED_KEY, "1");
-  };
+  }, []);
 
   if (!visible || !config.enabled) return null;
 
@@ -58,7 +56,6 @@ export default function PopupAnnouncement() {
       aria-modal="true"
       aria-labelledby="popup-title"
     >
-      {/* Overlay */}
       <button
         type="button"
         onClick={handleClose}
@@ -66,51 +63,138 @@ export default function PopupAnnouncement() {
         aria-label="Cerrar anuncio"
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-slide-up">
+        {/* Close */}
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-3 top-3 z-10 rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+          className="absolute right-3 top-3 z-10 rounded-full p-2 text-white/80 bg-black/30 backdrop-blur-sm transition-colors hover:bg-black/50"
           aria-label="Cerrar"
         >
-          <X size={20} />
+          <X size={18} />
         </button>
 
-        {config.image && (
-          <div className="relative h-40 w-full bg-gray-100 sm:h-48">
+        {/* Images */}
+        {allImages.length > 0 && (
+          <div className="relative h-48 w-full bg-gray-100 sm:h-56">
             <Image
-              src={config.image}
+              src={allImages[imgIdx]}
               alt={config.title || "Anuncio"}
               fill
               className="object-cover"
-              unoptimized={config.image.startsWith("data:")}
               sizes="(max-width: 448px) 100vw, 448px"
             />
+            {allImages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setImgIdx(
+                      (imgIdx - 1 + allImages.length) % allImages.length
+                    )
+                  }
+                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-1.5 text-white hover:bg-black/60"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setImgIdx((imgIdx + 1) % allImages.length)
+                  }
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-1.5 text-white hover:bg-black/60"
+                >
+                  <ChevronRight size={16} />
+                </button>
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {allImages.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setImgIdx(i)}
+                      className={`h-2 w-2 rounded-full transition-colors ${
+                        i === imgIdx ? "bg-white" : "bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
-        <div className="p-6">
+        {/* Content */}
+        <div
+          className="p-6"
+          style={{ backgroundColor: config.bgColor || "#ffffff" }}
+        >
+          {config.badge && (
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold mb-3 ${
+                isDark
+                  ? "bg-white/20 text-white"
+                  : "bg-[#E93B3C]/10 text-[#E93B3C]"
+              }`}
+            >
+              <Sparkles size={12} /> {config.badge}
+            </span>
+          )}
           {config.title && (
             <h2
               id="popup-title"
-              className="mb-2 text-xl font-bold text-gray-900"
+              className={`text-xl font-bold ${
+                isDark ? "text-white" : "text-gray-900"
+              }`}
             >
               {config.title}
             </h2>
           )}
-          {config.content && (
-            <p className="mb-6 text-gray-600">{config.content}</p>
-          )}
-          {config.ctaText && config.ctaUrl && (
-            <a
-              href={config.ctaUrl}
-              onClick={handleClose}
-              className="inline-block rounded-full px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90 bg-brand-red"
+          {config.subtitle && (
+            <p
+              className={`text-sm font-medium mt-1 ${
+                isDark ? "text-white/80" : "text-[#E93B3C]"
+              }`}
             >
-              {config.ctaText}
-            </a>
+              {config.subtitle}
+            </p>
           )}
+          {config.content && (
+            <p
+              className={`mt-2 text-sm ${
+                isDark ? "text-white/70" : "text-gray-600"
+              }`}
+            >
+              {config.content}
+            </p>
+          )}
+          <div className="mt-5 flex flex-wrap gap-2">
+            {config.ctaText && config.ctaUrl && (
+              <a
+                href={config.ctaUrl}
+                onClick={handleClose}
+                className={`inline-block rounded-full px-6 py-3 text-sm font-bold transition-all hover:opacity-90 ${
+                  isDark
+                    ? "bg-white text-gray-900"
+                    : "bg-[#E93B3C] text-white"
+                }`}
+              >
+                {config.ctaText}
+              </a>
+            )}
+            {config.cta2Text && config.cta2Url && (
+              <a
+                href={config.cta2Url}
+                onClick={handleClose}
+                className={`inline-block rounded-full px-6 py-3 text-sm font-bold border-2 transition-all hover:opacity-90 ${
+                  isDark
+                    ? "border-white/40 text-white"
+                    : "border-[#E93B3C]/30 text-[#E93B3C]"
+                }`}
+              >
+                {config.cta2Text}
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </div>

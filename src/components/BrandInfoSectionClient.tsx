@@ -11,7 +11,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { BRANDS } from "@/lib/brands";
-import { storageService } from "@/lib/storage";
 import { WHATSAPP_NUMBERS } from "@/types";
 import type { BrandSlug } from "@/types";
 import type { Brand } from "@/types";
@@ -42,19 +41,14 @@ export default function BrandInfoSectionClient({
   const [brandInfo, setBrandInfo] = useState<Brand>(() => BRANDS[brand]);
 
   useEffect(() => {
-    const stored = storageService.getBrandContent([]);
-    const content = stored.find((c) => c.brand === brand) ?? null;
-    setBrandInfo(mergeBrandInfo(BRANDS[brand], content));
-  }, [brand]);
-
-  useEffect(() => {
-    const handler = () => {
-      const stored = storageService.getBrandContent([]);
-      const content = stored.find((c) => c.brand === brand) ?? null;
-      setBrandInfo(mergeBrandInfo(BRANDS[brand], content));
-    };
-    window.addEventListener("storage-update", handler);
-    return () => window.removeEventListener("storage-update", handler);
+    fetch("/api/admin/brand-content")
+      .then((res) => res.json())
+      .then((data) => {
+        const stored = data.content || [];
+        const content = stored.find((c: { brand: string }) => c.brand === brand) ?? null;
+        setBrandInfo(mergeBrandInfo(BRANDS[brand], content));
+      })
+      .catch(() => {});
   }, [brand]);
 
   const whatsappNumber = brandInfo.whatsapp ?? WHATSAPP_NUMBERS[0].number;

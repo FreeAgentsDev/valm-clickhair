@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, Menu, X, Lock, Droplets, Flower2, Sparkles, Heart, Star, Gift, LayoutGrid } from "lucide-react";
@@ -8,6 +9,14 @@ import { useSidebar } from "@/hooks/useSidebar";
 import { useCart } from "@/lib/cart-context";
 import { BRANDS } from "@/lib/brands";
 import type { BrandSlug } from "@/types";
+
+const DEFAULT_MARQUEE = [
+  "Envíos a todo Colombia",
+  "Pago seguro con Wompi y ADDI",
+  "Productos 100% originales",
+  "Compra fácil y rápido",
+  "Marcas certificadas",
+];
 
 const CATEGORIES = [
   { href: "/catalogo", label: "Catalogo", icon: LayoutGrid },
@@ -27,6 +36,16 @@ export default function Header({ brand }: HeaderProps) {
   const { itemCount } = useCart();
   const currentBrand = brand ? BRANDS[brand] : null;
   const sidebar = useSidebar();
+  const [marqueeMessages, setMarqueeMessages] = useState(DEFAULT_MARQUEE);
+
+  useEffect(() => {
+    fetch("/api/marquee")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.messages?.length) setMarqueeMessages(data.messages);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -35,16 +54,12 @@ export default function Header({ brand }: HeaderProps) {
         <div className="flex animate-marquee whitespace-nowrap py-2 w-max">
           {[...Array(2)].map((_, i) => (
             <span key={i} className="flex items-center" aria-hidden={i > 0 ? true : undefined}>
-              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Envíos a todo Colombia</span>
-              <span className="mx-2 text-brand-red/40">·</span>
-              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Pago seguro con Wompi y ADDI</span>
-              <span className="mx-2 text-brand-red/40">·</span>
-              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Productos 100% originales</span>
-              <span className="mx-2 text-brand-red/40">·</span>
-              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Compra fácil y rápido</span>
-              <span className="mx-2 text-brand-red/40">·</span>
-              <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">Marcas certificadas</span>
-              <span className="mx-2 text-brand-red/40">·</span>
+              {marqueeMessages.map((msg, idx) => (
+                <span key={idx} className="flex items-center">
+                  <span className="mx-6 text-xs font-semibold text-brand-red tracking-wide">{msg}</span>
+                  <span className="mx-2 text-brand-red/40">·</span>
+                </span>
+              ))}
             </span>
           ))}
         </div>

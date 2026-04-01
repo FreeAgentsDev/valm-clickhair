@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { BrandContent, BrandSlug } from "@/types";
 import { BRANDS } from "@/lib/brands";
-import { storageService } from "@/lib/storage";
 
 function getInitialContent(): BrandContent[] {
   return (["valm-beauty", "click-hair"] as BrandSlug[]).map((slug) => ({
@@ -19,11 +18,16 @@ export function useBrandContent() {
   const [content, setContent] = useState<BrandContent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const refreshData = useCallback(() => {
+  const refreshData = useCallback(async () => {
     setLoading(true);
     try {
-      const stored = storageService.getBrandContent(getInitialContent());
-      setContent(stored);
+      const res = await fetch("/api/admin/brand-content");
+      const data = await res.json();
+      if (data.content) {
+        setContent(data.content);
+      } else {
+        setContent(getInitialContent());
+      }
     } catch (err) {
       console.error("Error cargando contenido de marca:", err);
       setContent(getInitialContent());
@@ -36,18 +40,18 @@ export function useBrandContent() {
     refreshData();
   }, [refreshData]);
 
-  useEffect(() => {
-    const handler = () => refreshData();
-    window.addEventListener("storage-update", handler);
-    return () => window.removeEventListener("storage-update", handler);
-  }, [refreshData]);
-
   const updateBrandContent = useCallback((updated: BrandContent) => {
     setContent((prev) => {
       const next = prev.some((c) => c.brand === updated.brand)
         ? prev.map((c) => (c.brand === updated.brand ? updated : c))
         : [...prev, updated];
-      storageService.saveBrandContent(next);
+
+      fetch("/api/admin/brand-content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: next }),
+      }).catch((err) => console.error("Error guardando contenido:", err));
+
       return next;
     });
   }, []);

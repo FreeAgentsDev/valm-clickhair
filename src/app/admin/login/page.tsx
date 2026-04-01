@@ -6,29 +6,35 @@ import Link from "next/link";
 import { Lock, ExternalLink } from "lucide-react";
 import { BRANDS } from "@/lib/brands";
 
-const ADMIN_PASSWORD = "admin123";
-
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    setTimeout(() => {
-      if (password === ADMIN_PASSWORD) {
-        if (typeof window !== "undefined") {
-          localStorage.setItem("admin_authenticated", "true");
-          window.location.href = "/admin";
-        }
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        window.location.href = "/admin";
       } else {
-        setError("Contraseña incorrecta");
+        setError(data.error || "Contraseña incorrecta");
       }
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
       setIsLoading(false);
-    }, 300);
+    }
   };
 
   return (
@@ -91,16 +97,6 @@ export default function AdminLoginPage() {
               {isLoading ? "Verificando..." : "Ingresar"}
             </button>
           </form>
-
-          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-xs text-gray-600">
-              <strong className="text-amber-700">Nota:</strong> Contraseña de
-              prueba:{" "}
-              <code className="rounded bg-amber-100 px-2 py-1 text-amber-800">
-                admin123
-              </code>
-            </p>
-          </div>
         </div>
 
         <Link

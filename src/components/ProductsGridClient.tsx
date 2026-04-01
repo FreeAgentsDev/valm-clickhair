@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
-import { storageService } from "@/lib/storage";
-import { PRODUCTS } from "@/lib/products";
 import type { Product } from "@/types";
 import type { BrandSlug } from "@/types";
 
@@ -12,11 +10,6 @@ interface ProductsGridClientProps {
   initialProducts: Product[];
 }
 
-/**
- * Grid de productos que lee de localStorage (datos editados en admin)
- * o usa los productos iniciales como fallback.
- * Escucha storage-update para reflejar cambios en tiempo real.
- */
 export default function ProductsGridClient({
   brand,
   initialProducts,
@@ -24,16 +17,15 @@ export default function ProductsGridClient({
   const [products, setProducts] = useState<Product[]>(initialProducts);
 
   useEffect(() => {
-    const loaded = storageService.getProducts(PRODUCTS).filter((p) => p.brand === brand);
-    setProducts(loaded.length > 0 ? loaded : initialProducts);
-
-    const handleStorageUpdate = () => {
-      const updated = storageService.getProducts(PRODUCTS).filter((p) => p.brand === brand);
-      setProducts(updated.length > 0 ? updated : initialProducts);
-    };
-
-    window.addEventListener("storage-update", handleStorageUpdate);
-    return () => window.removeEventListener("storage-update", handleStorageUpdate);
+    fetch("/api/admin/products")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.products) {
+          const filtered = data.products.filter((p: Product) => p.brand === brand);
+          setProducts(filtered.length > 0 ? filtered : initialProducts);
+        }
+      })
+      .catch(() => {});
   }, [brand, initialProducts]);
 
   return (

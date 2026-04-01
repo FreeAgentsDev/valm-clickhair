@@ -8,7 +8,6 @@ import Header from "@/components/Header";
 import AddToCartButton from "./AddToCartButton";
 import { BRANDS } from "@/lib/brands";
 import { PRODUCTS } from "@/lib/products";
-import { storageService } from "@/lib/storage";
 import type { Product } from "@/types";
 
 export default function ProductPageClient() {
@@ -19,10 +18,18 @@ export default function ProductPageClient() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const all = storageService.getProducts(PRODUCTS);
-    const found = all.find((p) => p.id === id && p.brand === brand);
-    setProduct(found ?? null);
-    setLoading(false);
+    fetch("/api/admin/products")
+      .then((res) => res.json())
+      .then((data) => {
+        const all = data.products || PRODUCTS;
+        const found = all.find((p: Product) => p.id === id && p.brand === brand);
+        setProduct(found ?? null);
+      })
+      .catch(() => {
+        const found = PRODUCTS.find((p) => p.id === id && p.brand === brand);
+        setProduct(found ?? null);
+      })
+      .finally(() => setLoading(false));
   }, [brand, id]);
 
   if (loading) {

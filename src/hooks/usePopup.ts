@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { PopupConfig } from "@/types";
-import { storageService } from "@/lib/storage";
 
 const DEFAULT: PopupConfig = {
   enabled: false,
@@ -16,10 +15,16 @@ export function usePopup() {
   const [config, setConfig] = useState<PopupConfig>(DEFAULT);
   const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      setConfig(storageService.getPopup(DEFAULT));
+      const res = await fetch("/api/admin/popup");
+      const data = await res.json();
+      if (data.config) {
+        setConfig(data.config);
+      } else {
+        setConfig(DEFAULT);
+      }
     } catch (err) {
       console.error("Error cargando popup:", err);
       setConfig(DEFAULT);
@@ -32,15 +37,13 @@ export function usePopup() {
     refresh();
   }, [refresh]);
 
-  useEffect(() => {
-    const handler = () => refresh();
-    window.addEventListener("storage-update", handler);
-    return () => window.removeEventListener("storage-update", handler);
-  }, [refresh]);
-
   const updatePopup = useCallback((next: PopupConfig) => {
     setConfig(next);
-    storageService.savePopup(next);
+    fetch("/api/admin/popup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ config: next }),
+    }).catch((err) => console.error("Error guardando popup:", err));
   }, []);
 
   return { config, loading, updatePopup, refresh };

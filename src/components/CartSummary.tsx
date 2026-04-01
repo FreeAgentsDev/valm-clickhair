@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { BRANDS } from "@/lib/brands";
-import WhatsAppCartButton from "./WhatsAppCartButton";
 
 export default function CartSummary() {
   const { items, updateQuantity, removeItem, total } = useCart();
@@ -99,7 +98,6 @@ export default function CartSummary() {
             {formatPrice(total)}
           </span>
         </div>
-        <WhatsAppCartButton />
         <Link
           href="/checkout"
           className="flex w-full items-center justify-center gap-2 rounded-xl py-4 font-bold text-white transition-all hover:opacity-95 shadow-md"
