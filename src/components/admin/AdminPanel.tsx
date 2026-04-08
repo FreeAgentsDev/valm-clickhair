@@ -10,6 +10,7 @@ import { useMarquee } from "@/hooks/useMarquee";
 import { useHeroContent } from "@/hooks/useHeroContent";
 import { useShipping } from "@/hooks/useShipping";
 import { useDiscounts } from "@/hooks/useDiscounts";
+import { useTestimonials } from "@/hooks/useTestimonials";
 import AdminLayout from "./layout/AdminLayout";
 import ProductEditor from "./editors/ProductEditor";
 import DiscountEditor from "./editors/DiscountEditor";
@@ -18,6 +19,7 @@ import PopupEditor from "./editors/PopupEditor";
 import OrdersViewer from "./editors/OrdersViewer";
 import MarqueeEditor from "./editors/MarqueeEditor";
 import HeroContentEditor from "./editors/HeroContentEditor";
+import TestimonialEditor from "./editors/TestimonialEditor";
 import ShippingEditor from "./editors/ShippingEditor";
 
 type TabId = "productos" | "ordenes" | "descuentos" | "envios" | "contenido" | "popup";
@@ -52,6 +54,7 @@ export default function AdminPanel() {
     toggleDiscount,
     removeDiscount,
   } = useDiscounts();
+  const { testimonials, loading: testimonialsLoading, updateTestimonials } = useTestimonials();
   const {
     barrios,
     nacional,
@@ -194,6 +197,11 @@ export default function AdminPanel() {
           {/* Marquee */}
           <div className="rounded-2xl border border-gray-200 bg-white p-6">
             <MarqueeEditor messages={marqueeMessages} onSave={updateMarquee} loading={marqueeLoading} />
+          </div>
+
+          {/* Testimonials */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+            <TestimonialEditor testimonials={testimonials} onSave={updateTestimonials} loading={testimonialsLoading} />
           </div>
 
         </div>
