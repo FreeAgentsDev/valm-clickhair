@@ -63,3 +63,12 @@ export function updateOrderStatus(
   writeOrders(orders);
   return order;
 }
+
+export function deleteOrder(id: string): boolean {
+  const orders = readOrders();
+  const idx = orders.findIndex((o) => o.id === id);
+  if (idx < 0) return false;
+  orders.splice(idx, 1);
+  writeOrders(orders);
+  return true;
+}

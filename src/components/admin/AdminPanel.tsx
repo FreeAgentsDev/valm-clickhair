@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Package, FileText, Megaphone, ShoppingBag, Truck } from "lucide-react";
+import { Package, FileText, Megaphone, ShoppingBag, Truck, Percent } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 
 import { usePopup } from "@/hooks/usePopup";
@@ -9,16 +9,20 @@ import { useOrders } from "@/hooks/useOrders";
 import { useMarquee } from "@/hooks/useMarquee";
 import { useHeroContent } from "@/hooks/useHeroContent";
 import { useShipping } from "@/hooks/useShipping";
+import { useDiscounts } from "@/hooks/useDiscounts";
+import { useTestimonials } from "@/hooks/useTestimonials";
 import AdminLayout from "./layout/AdminLayout";
 import ProductEditor from "./editors/ProductEditor";
+import DiscountEditor from "./editors/DiscountEditor";
 
 import PopupEditor from "./editors/PopupEditor";
 import OrdersViewer from "./editors/OrdersViewer";
 import MarqueeEditor from "./editors/MarqueeEditor";
 import HeroContentEditor from "./editors/HeroContentEditor";
+import TestimonialEditor from "./editors/TestimonialEditor";
 import ShippingEditor from "./editors/ShippingEditor";
 
-type TabId = "productos" | "ordenes" | "envios" | "contenido" | "popup";
+type TabId = "productos" | "ordenes" | "descuentos" | "envios" | "contenido" | "popup";
 
 export default function AdminPanel() {
   const [tab, setTab] = useState<TabId>("productos");
@@ -38,9 +42,19 @@ export default function AdminPanel() {
     error: ordersError,
     refreshOrders,
     updateStatus,
+    deleteOrder,
   } = useOrders();
   const { messages: marqueeMessages, loading: marqueeLoading, updateMessages: updateMarquee } = useMarquee();
   const { content: heroContent, loading: heroLoading, updateContent: updateHero } = useHeroContent();
+  const {
+    discounts: categoryDiscounts,
+    categories: discountCategories,
+    loading: discountsLoading,
+    upsertDiscount,
+    toggleDiscount,
+    removeDiscount,
+  } = useDiscounts();
+  const { testimonials, loading: testimonialsLoading, updateTestimonials } = useTestimonials();
   const {
     barrios,
     nacional,
@@ -78,6 +92,7 @@ export default function AdminPanel() {
   const tabs: { id: TabId; label: string; icon: typeof Package; badge?: number }[] = [
     { id: "productos", label: "Productos", icon: Package, badge: dbProducts.length },
     { id: "ordenes", label: "Órdenes", icon: ShoppingBag, badge: orders.length },
+    { id: "descuentos", label: "Descuentos", icon: Percent, badge: categoryDiscounts.filter(d => d.activo).length },
     { id: "envios", label: "Envíos", icon: Truck, badge: barrios.length },
     { id: "contenido", label: "Contenido", icon: FileText },
     { id: "popup", label: "Popup", icon: Megaphone },
@@ -135,7 +150,24 @@ export default function AdminPanel() {
           error={ordersError}
           onRefresh={refreshOrders}
           onUpdateStatus={updateStatus}
+          onDelete={deleteOrder}
         />
+      )}
+
+      {tab === "descuentos" && (
+        <>
+          {discountsLoading && !categoryDiscounts.length ? (
+            <p className="text-gray-500 animate-pulse">Cargando descuentos...</p>
+          ) : (
+            <DiscountEditor
+              discounts={categoryDiscounts}
+              categories={discountCategories}
+              onUpsert={upsertDiscount}
+              onToggle={toggleDiscount}
+              onDelete={removeDiscount}
+            />
+          )}
+        </>
       )}
 
       {tab === "envios" && (
@@ -165,6 +197,11 @@ export default function AdminPanel() {
           {/* Marquee */}
           <div className="rounded-2xl border border-gray-200 bg-white p-6">
             <MarqueeEditor messages={marqueeMessages} onSave={updateMarquee} loading={marqueeLoading} />
+          </div>
+
+          {/* Testimonials */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+            <TestimonialEditor testimonials={testimonials} onSave={updateTestimonials} loading={testimonialsLoading} />
           </div>
 
         </div>

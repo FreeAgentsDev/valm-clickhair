@@ -18,8 +18,8 @@ import { BRANDS } from "@/lib/brands";
 import Header from "@/components/Header";
 import DbProductCard from "@/components/DbProductCard";
 import AnimateOnScroll from "@/components/AnimateOnScroll";
-import { getFeaturedProducts } from "@/lib/db";
-import { getAdminHero } from "@/lib/admin-storage";
+import { getFeaturedProducts, applyCategDiscounts } from "@/lib/db";
+import { getAdminHero, getAdminTestimonials } from "@/lib/admin-storage";
 
 export const revalidate = 60;
 
@@ -38,9 +38,16 @@ const DEFAULT_HERO = {
 };
 
 export default async function Home() {
-  const featuredProducts = await getFeaturedProducts(8);
+  const featuredProducts = await applyCategDiscounts(await getFeaturedProducts(8));
   const heroContent = getAdminHero() ?? DEFAULT_HERO;
   const hero = { ...DEFAULT_HERO, ...heroContent };
+
+  const DEFAULT_TESTIMONIALS = [
+    { name: "Carolina M.", text: "Los perfumes capilares son increibles, mi cabello huele espectacular todo el dia. Amo la variedad que tienen.", label: "Clienta verificada", stars: 5 },
+    { name: "Valentina R.", text: "Los exfoliantes Walaky son buenisimos. La atencion por WhatsApp fue super rapida y me asesoraron perfecto.", label: "Clienta verificada", stars: 5 },
+    { name: "Laura G.", text: "La mantequilla con glitter es un descubrimiento! Piel suave, brillante y el aroma dura horas.", label: "Clienta verificada", stars: 5 },
+  ];
+  const testimonials = getAdminTestimonials() ?? DEFAULT_TESTIMONIALS;
 
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -265,11 +272,7 @@ export default async function Home() {
               </h2>
             </AnimateOnScroll>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                { name: "Carolina M.", text: "Los perfumes capilares son increibles, mi cabello huele espectacular todo el dia. Amo la variedad que tienen." },
-                { name: "Valentina R.", text: "Los exfoliantes Walaky son buenisimos. La atencion por WhatsApp fue super rapida y me asesoraron perfecto." },
-                { name: "Laura G.", text: "La mantequilla con glitter es un descubrimiento! Piel suave, brillante y el aroma dura horas." },
-              ].map((review, i) => (
+              {testimonials.map((review, i) => (
                 <AnimateOnScroll key={i} delay={i * 0.12} direction="up">
                   <article className="bg-white rounded-2xl p-7 border-2 border-[#F6BCCB]/30 shadow-sm hover:shadow-lg hover:shadow-[#F6BCCB]/15 transition-all duration-300 hover:-translate-y-1 h-full">
                     <Quote size={24} className="text-[#F6BCCB] mb-4" />
@@ -277,10 +280,10 @@ export default async function Home() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-bold text-gray-900 text-sm">{review.name}</p>
-                        <p className="text-xs text-gray-400">Clienta verificada</p>
+                        <p className="text-xs text-gray-400">{review.label}</p>
                       </div>
                       <div className="flex gap-0.5">
-                        {[...Array(5)].map((_, j) => (
+                        {[...Array(review.stars)].map((_, j) => (
                           <Star key={j} size={14} className="fill-[#E93B3C] text-[#E93B3C]" />
                         ))}
                       </div>

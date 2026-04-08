@@ -27,8 +27,17 @@ export default function CheckoutPage() {
   });
 
   const isManizales = address.city.toLowerCase().trim() === "manizales";
+  const FREE_SHIPPING_THRESHOLD = 200000;
+  const isFreeShipping = total >= FREE_SHIPPING_THRESHOLD;
 
   const recalcularEnvio = useCallback(async () => {
+    // Envío gratis para compras >= $200.000
+    if (isFreeShipping) {
+      setShippingCost(0);
+      setShippingMessage("¡Envío gratis por compras mayores a $200.000!");
+      return;
+    }
+
     if (isManizales) {
       if (!selectedBarrio) {
         setShippingCost(null);
@@ -66,7 +75,7 @@ export default function CheckoutPage() {
     } finally {
       setLoadingShipping(false);
     }
-  }, [address.city, address.department, isManizales, selectedBarrio, totalWeight]);
+  }, [address.city, address.department, isManizales, isFreeShipping, selectedBarrio, totalWeight]);
 
   useEffect(() => {
     recalcularEnvio();
@@ -78,26 +87,6 @@ export default function CheckoutPage() {
       currency: "COP",
       maximumFractionDigits: 0,
     }).format(price);
-
-  const buildAddiWhatsAppMessage = (reference: string) => {
-    const ship = shippingCost ?? 0;
-    const orderTotal = total + ship;
-    let msg = `Hola! Quiero comprar con *ADDI* (cuotas) los siguientes productos:\n\n`;
-    msg += `*Pedido:* ${reference}\n\n`;
-    items.forEach((item) => {
-      msg += `• ${item.product.name} x${item.quantity} — ${formatPrice(item.product.price * item.quantity)}\n`;
-    });
-    msg += `\n*Subtotal:* ${formatPrice(total)}`;
-    msg += `\n*Envío:* ${formatPrice(ship)}`;
-    msg += `\n*Total:* ${formatPrice(orderTotal)}`;
-    msg += `\n\n*Datos de envío:*`;
-    msg += `\n${address.name}`;
-    msg += `\n${address.phone}`;
-    msg += `\n${address.email}`;
-    msg += `\n${address.address}, ${address.city}, ${address.department}`;
-    msg += `\n\nPor favor envíame el link de ADDI para realizar el pago en cuotas. Gracias!`;
-    return encodeURIComponent(msg);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,12 +146,47 @@ export default function CheckoutPage() {
         }
         if (data.error) throw new Error(data.error);
       } else {
-        // ADDI → WhatsApp con mensaje pre-armado
-        const message = buildAddiWhatsAppMessage(reference);
-        window.open(`https://wa.me/573104077106?text=${message}`, "_blank");
-        clearCart();
-        router.push(`/checkout/success?ref=${reference}`);
-        return;
+        // ADDI - Crear solicitud de crédito
+        const nameParts = address.name.trim().split(/\s+/);
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(" ") || firstName;
+        const ship = shippingCost ?? 0;
+
+        const res = await fetch("/api/addi/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: reference,
+            totalAmount: orderTotal,
+            shippingAmount: ship,
+            items: items.map((item) => ({
+              name: item.product.name,
+              quantity: item.quantity,
+              unitPrice: item.product.price,
+              pictureUrl: item.product.image,
+              category: item.product.category || "General",
+            })),
+            client: {
+              firstName,
+              lastName,
+              email: address.email,
+              cellphone: address.phone,
+              idType: "CC",
+              idNumber: address.idNumber,
+            },
+            shippingAddress: {
+              lineOne: address.address,
+              city: address.city,
+              state: address.department,
+            },
+          }),
+        });
+        const data = await res.json();
+        if (data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+          return;
+        }
+        if (data.error) throw new Error(data.error);
       }
 
       router.push(`/checkout/success?ref=${reference}`);
@@ -206,6 +230,7 @@ export default function CheckoutPage() {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <input type="text" placeholder="Nombre completo *" value={address.name} onChange={(e) => setAddress({ ...address, name: e.target.value })} required className="rounded-xl border border-gray-200 px-4 py-3" />
+              <input type="text" placeholder="Cédula de ciudadanía *" value={address.idNumber || ""} onChange={(e) => setAddress({ ...address, idNumber: e.target.value.replace(/\D/g, "") })} required className="rounded-xl border border-gray-200 px-4 py-3" inputMode="numeric" />
               <input type="email" placeholder="Email *" value={address.email} onChange={(e) => setAddress({ ...address, email: e.target.value })} required className="rounded-xl border border-gray-200 px-4 py-3" />
               <input type="tel" placeholder="Teléfono *" value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} required className="rounded-xl border border-gray-200 px-4 py-3" />
               <input type="text" placeholder="Ciudad *" value={address.city} onChange={(e) => {
@@ -264,8 +289,13 @@ export default function CheckoutPage() {
                   selected={selectedBarrio}
                   onSelect={(barrio) => {
                     setSelectedBarrio(barrio.nombre);
-                    setShippingCost(barrio.precio);
-                    setShippingMessage(`Envío local - ${barrio.nombre}`);
+                    if (isFreeShipping) {
+                      setShippingCost(0);
+                      setShippingMessage("¡Envío gratis por compras mayores a $200.000!");
+                    } else {
+                      setShippingCost(barrio.precio);
+                      setShippingMessage(`Envío local - ${barrio.nombre}`);
+                    }
                   }}
                 />
               </div>
@@ -353,7 +383,15 @@ export default function CheckoutPage() {
               <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(total)}</span></div>
               <div className="flex justify-between">
                 <span>Envío</span>
-                <span>{shippingCost != null ? formatPrice(shippingCost) : "Por calcular"}</span>
+                {shippingCost != null ? (
+                  isFreeShipping ? (
+                    <span className="font-semibold text-green-600">GRATIS</span>
+                  ) : (
+                    <span>{formatPrice(shippingCost)}</span>
+                  )
+                ) : (
+                  <span>Por calcular</span>
+                )}
               </div>
               <div className="flex justify-between text-lg font-bold pt-4 border-t">
                 <span>Total</span>

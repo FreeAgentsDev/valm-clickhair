@@ -4,7 +4,8 @@ import Link from "next/link";
 import { ArrowLeft, Shield, Truck } from "lucide-react";
 import Header from "@/components/Header";
 import AddToCartButton from "@/components/AddToCartButton";
-import { getProductById } from "@/lib/db";
+import AddiWidget from "@/components/AddiWidget";
+import { getProductById, applyCategDiscounts } from "@/lib/db";
 import ProductDetailClient from "./ProductDetailClient";
 import type { Product } from "@/types";
 
@@ -16,9 +17,11 @@ interface ProductDetailPageProps {
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = await params;
-  const product = await getProductById(id);
+  const rawProduct = await getProductById(id);
 
-  if (!product) notFound();
+  if (!rawProduct) notFound();
+
+  const [product] = await applyCategDiscounts([rawProduct]);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(price);
@@ -89,6 +92,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 } satisfies Product}
               />
             </div>
+
+            {/* ADDI Widget - cuotas */}
+            <AddiWidget price={discountedPrice} />
 
             {/* Trust */}
             <div className="mt-8 grid grid-cols-2 gap-3">

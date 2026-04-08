@@ -80,6 +80,22 @@ export function saveAdminHero(content: HeroContent) {
   writeJson("admin-hero.json", content);
 }
 
+// ─── Testimonials ───
+export interface Testimonial {
+  name: string;
+  text: string;
+  label: string;
+  stars: number;
+}
+
+export function getAdminTestimonials(): Testimonial[] | null {
+  return readJson<Testimonial[] | null>("admin-testimonials.json", null);
+}
+
+export function saveAdminTestimonials(testimonials: Testimonial[]) {
+  writeJson("admin-testimonials.json", testimonials);
+}
+
 // ─── Marquee ───
 export function getAdminMarquee(): string[] | null {
   return readJson<string[] | null>("admin-marquee.json", null);
