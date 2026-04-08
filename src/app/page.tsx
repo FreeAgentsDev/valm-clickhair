@@ -18,7 +18,7 @@ import { BRANDS } from "@/lib/brands";
 import Header from "@/components/Header";
 import DbProductCard from "@/components/DbProductCard";
 import AnimateOnScroll from "@/components/AnimateOnScroll";
-import { getFeaturedProducts } from "@/lib/db";
+import { getFeaturedProducts, applyCategDiscounts } from "@/lib/db";
 import { getAdminHero } from "@/lib/admin-storage";
 
 export const revalidate = 60;
@@ -38,7 +38,7 @@ const DEFAULT_HERO = {
 };
 
 export default async function Home() {
-  const featuredProducts = await getFeaturedProducts(8);
+  const featuredProducts = await applyCategDiscounts(await getFeaturedProducts(8));
   const heroContent = getAdminHero() ?? DEFAULT_HERO;
   const hero = { ...DEFAULT_HERO, ...heroContent };
 

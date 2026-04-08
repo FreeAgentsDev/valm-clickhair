@@ -48,5 +48,20 @@ export function useOrders() {
     []
   );
 
-  return { orders, loading, error, refreshOrders, updateStatus };
+  const deleteOrder = useCallback(
+    async (id: string) => {
+      try {
+        const res = await fetch(`/api/admin/orders?id=${encodeURIComponent(id)}`, {
+          method: "DELETE",
+        });
+        if (!res.ok) throw new Error("Error eliminando orden");
+        setOrders((prev) => prev.filter((o) => o.id !== id));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error al eliminar");
+      }
+    },
+    []
+  );
+
+  return { orders, loading, error, refreshOrders, updateStatus, deleteOrder };
 }

@@ -334,6 +334,92 @@ export async function updateShippingNacional(
   };
 }
 
+// ─── Category Discounts ───
+
+export interface DbCategoryDiscount {
+  id: number;
+  categoria: string;
+  descuento: number;
+  activo: boolean;
+  created_at: string;
+}
+
+async function ensureCategoryDiscountsTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS category_discounts (
+      id SERIAL PRIMARY KEY,
+      categoria TEXT UNIQUE NOT NULL,
+      descuento NUMERIC NOT NULL DEFAULT 0,
+      activo BOOLEAN NOT NULL DEFAULT true,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+}
+
+export async function getCategoryDiscounts(): Promise<DbCategoryDiscount[]> {
+  await ensureCategoryDiscountsTable();
+  const { rows } = await pool.query<DbCategoryDiscount>(
+    `SELECT * FROM category_discounts ORDER BY categoria`
+  );
+  return rows.map((r) => ({ ...r, descuento: Number(r.descuento) }));
+}
+
+export async function upsertCategoryDiscount(
+  categoria: string,
+  descuento: number
+): Promise<DbCategoryDiscount> {
+  await ensureCategoryDiscountsTable();
+  const { rows } = await pool.query<DbCategoryDiscount>(
+    `INSERT INTO category_discounts (categoria, descuento)
+     VALUES ($1, $2)
+     ON CONFLICT (categoria) DO UPDATE SET descuento = $2
+     RETURNING *`,
+    [categoria, descuento]
+  );
+  return { ...rows[0], descuento: Number(rows[0].descuento) };
+}
+
+export async function updateCategoryDiscount(
+  id: number,
+  data: { descuento?: number; activo?: boolean }
+): Promise<DbCategoryDiscount> {
+  await ensureCategoryDiscountsTable();
+  const { rows } = await pool.query<DbCategoryDiscount>(
+    `UPDATE category_discounts SET
+       descuento = COALESCE($2, descuento),
+       activo = COALESCE($3, activo)
+     WHERE id = $1 RETURNING *`,
+    [id, data.descuento ?? null, data.activo ?? null]
+  );
+  if (rows.length === 0) throw new Error("Descuento de categoría no encontrado");
+  return { ...rows[0], descuento: Number(rows[0].descuento) };
+}
+
+export async function deleteCategoryDiscount(id: number): Promise<void> {
+  await ensureCategoryDiscountsTable();
+  await pool.query(`DELETE FROM category_discounts WHERE id = $1`, [id]);
+}
+
+/** Apply active category discounts to products that have no individual discount */
+export async function applyCategDiscounts(products: DbProduct[]): Promise<DbProduct[]> {
+  const discounts = await getCategoryDiscounts();
+  const discountMap = new Map<string, number>();
+  for (const d of discounts) {
+    if (d.activo && d.descuento > 0) {
+      discountMap.set(d.categoria, d.descuento);
+    }
+  }
+
+  return products.map((p) => {
+    if (p.descuento > 0) return p; // product has its own discount
+    const catDiscount = discountMap.get(p.categoria);
+    if (catDiscount) {
+      return { ...p, descuento: catDiscount };
+    }
+    return p;
+  });
+}
+
 export async function getFeaturedProducts(limit = 4): Promise<DbProduct[]> {
   const { rows } = await pool.query<DbProduct & { imgs: string | null }>(
     `

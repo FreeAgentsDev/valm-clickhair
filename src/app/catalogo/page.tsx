@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { getProducts, getCategories } from "@/lib/db";
+import { getProducts, getCategories, applyCategDiscounts } from "@/lib/db";
 import CatalogFilter from "./CatalogFilter";
 
 export const revalidate = 60;
@@ -11,11 +11,12 @@ export default async function CatalogoPage({
 }: {
   searchParams: Promise<{ categoria?: string }>;
 }) {
-  const [products, categories, params] = await Promise.all([
+  const [rawProducts, categories, params] = await Promise.all([
     getProducts(),
     getCategories(),
     searchParams,
   ]);
+  const products = await applyCategDiscounts(rawProducts);
   const initialCategory = params.categoria ?? "todos";
   const categoryNames = categories.map((c) => c.nombre).filter((n) => n !== "todos");
 
