@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Header from "@/components/Header";
 import { useCart } from "@/lib/cart-context";
 import { Wallet, Truck, ShoppingBag, MapPin } from "lucide-react";
@@ -17,6 +18,7 @@ export default function CheckoutPage() {
   const [selectedBarrio, setSelectedBarrio] = useState("");
   const [loadingShipping, setLoadingShipping] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dataConsent, setDataConsent] = useState(false);
   const [address, setAddress] = useState<ShippingAddress>({
     name: "",
     email: "",
@@ -90,7 +92,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (items.length === 0 || shippingCost == null) return;
+    if (items.length === 0 || shippingCost == null || !dataConsent) return;
 
     setLoading(true);
     try {
@@ -112,6 +114,9 @@ export default function CheckoutPage() {
           shippingCost,
           total: orderTotal,
           paymentMethod,
+          consent: {
+            acceptedAt: new Date().toISOString(),
+          },
         }),
       });
 
@@ -398,10 +403,33 @@ export default function CheckoutPage() {
                 <span>{formatPrice(total + (shippingCost ?? 0))}</span>
               </div>
             </div>
+            <label className="mt-6 flex items-start gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={dataConsent}
+                onChange={(e) => setDataConsent(e.target.checked)}
+                required
+                className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-[#E93B3C] focus:ring-[#E93B3C] cursor-pointer accent-[#E93B3C]"
+              />
+              <span className="text-sm text-gray-600 leading-relaxed">
+                He leído y acepto la{" "}
+                <Link
+                  href="/politica-datos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#E93B3C] font-semibold hover:underline"
+                >
+                  Política de Tratamiento de Datos Personales
+                </Link>
+                , y autorizo la recolección y tratamiento de mis datos para
+                procesar el pedido, gestionar el envío y cumplir con
+                obligaciones legales.
+              </span>
+            </label>
             <button
               type="submit"
-              disabled={loading || shippingCost == null}
-              className={`mt-6 w-full rounded-xl py-4 font-bold text-white disabled:opacity-50 transition-all ${
+              disabled={loading || shippingCost == null || !dataConsent}
+              className={`mt-4 w-full rounded-xl py-4 font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all ${
                 paymentMethod === "mercado-pago"
                   ? "bg-[#009EE3] hover:bg-[#0087C9]"
                   : "bg-emerald-500 hover:bg-emerald-600"
@@ -411,9 +439,11 @@ export default function CheckoutPage() {
                 ? "Procesando..."
                 : shippingCost == null
                   ? "Completa los datos de envío"
-                  : paymentMethod === "mercado-pago"
-                    ? "Pagar con Mercado Pago"
-                    : "Solicitar cuotas ADDI"}
+                  : !dataConsent
+                    ? "Acepta la política de datos"
+                    : paymentMethod === "mercado-pago"
+                      ? "Pagar con Mercado Pago"
+                      : "Solicitar cuotas ADDI"}
             </button>
           </section>
         </form>

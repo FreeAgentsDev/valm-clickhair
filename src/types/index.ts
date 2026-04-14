@@ -96,4 +96,9 @@ export interface Order {
   paymentMethod: "wompi" | "addi" | "mercado-pago";
   status: "pending" | "paid" | "processing" | "shipped" | "delivered";
   createdAt: string;
+  consent?: {
+    acceptedAt: string;
+    policyVersion: string;
+    ipAddress?: string;
+  };
 }

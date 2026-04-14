@@ -365,6 +365,7 @@ export default async function Home() {
                 <li><Link href="/valm-beauty" className="text-gray-500 text-sm hover:text-[#E93B3C] transition-colors">Valm Beauty</Link></li>
                 <li><Link href="/catalogo" className="text-gray-500 text-sm hover:text-[#E93B3C] transition-colors">Catalogo</Link></li>
                 <li><Link href="/cart" className="text-gray-500 text-sm hover:text-[#E93B3C] transition-colors">Mi carrito</Link></li>
+                <li><Link href="/politica-datos" className="text-gray-500 text-sm hover:text-[#E93B3C] transition-colors">Política de datos</Link></li>
               </ul>
             </div>
             <div>
