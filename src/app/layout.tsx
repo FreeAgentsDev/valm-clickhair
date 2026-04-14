@@ -27,20 +27,39 @@ export const metadata: Metadata = {
   },
   description:
     "Tienda virtual de belleza en Manizales. Skincare, perfumes capilares, exfoliantes, cuidado corporal. Marcas: Walaky, Girly, Olé, Fresa Morada. +100 productos originales. Envíos a todo Colombia.",
+  applicationName: "Valm Beauty",
   keywords: [
     "belleza Manizales",
     "skincare Manizales",
     "perfumes capilares",
     "Valm Beauty",
+    "Click Hair Manizales",
     "cuidado capilar Colombia",
     "Walaky",
     "Girly",
     "cosméticos Manizales",
     "productos de belleza Colombia",
     "tienda de belleza online",
+    "envío nacional belleza",
   ],
   authors: [{ name: "Valm Beauty", url: "https://www.instagram.com/valm_beauty_mzl" }],
   creator: "Valm Beauty",
+  publisher: "Valm Beauty",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icons/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+    shortcut: "/icon.svg",
+  },
   openGraph: {
     type: "website",
     locale: "es_CO",
@@ -49,12 +68,22 @@ export const metadata: Metadata = {
     title: "Valm Beauty | Belleza y Cuidado Personal en Manizales",
     description:
       "Tienda virtual de belleza en Manizales. +100 productos originales. Envíos a todo Colombia.",
-    images: [{ url: "/logos/logo.png", width: 1440, height: 480, alt: "Valm Beauty" }],
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Valm Beauty - Belleza y Cuidado Personal en Manizales",
+        type: "image/png",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Valm Beauty | Belleza en Manizales",
-    description: "Tienda virtual de belleza. +100 productos originales con envíos a todo Colombia.",
+    description:
+      "Tienda virtual de belleza. +100 productos originales con envíos a todo Colombia.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -62,6 +91,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
     },
   },
   alternates: {

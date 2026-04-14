@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -5,6 +6,20 @@ import { getProducts, getCategories, applyCategDiscounts } from "@/lib/db";
 import CatalogFilter from "./CatalogFilter";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Catálogo de productos",
+  description:
+    "Explora todos los productos de belleza disponibles en Valm Beauty: skincare, perfumes capilares, exfoliantes, cuidado corporal y más. Envíos a todo Colombia.",
+  alternates: { canonical: "/catalogo" },
+  openGraph: {
+    title: "Catálogo de productos | Valm Beauty",
+    description:
+      "Explora todos los productos de belleza disponibles. +100 productos originales con envíos a todo Colombia.",
+    url: "/catalogo",
+    images: ["/og-image.png"],
+  },
+};
 
 export default async function CatalogoPage({
   searchParams,

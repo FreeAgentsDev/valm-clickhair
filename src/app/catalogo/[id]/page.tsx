@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +14,42 @@ export const revalidate = 60;
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: ProductDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProductById(id).catch(() => null);
+
+  if (!product) {
+    return { title: "Producto no encontrado" };
+  }
+
+  const description =
+    product.descripcion?.slice(0, 160) ||
+    `Compra ${product.nombre} en Valm Beauty. Envíos a todo Colombia.`;
+  const image = product.images?.[0] || product.imagen || "/og-image.png";
+
+  return {
+    title: product.nombre,
+    description,
+    alternates: { canonical: `/catalogo/${id}` },
+    openGraph: {
+      type: "website",
+      title: product.nombre,
+      description,
+      url: `/catalogo/${id}`,
+      siteName: "Valm Beauty",
+      images: [{ url: image, alt: product.nombre }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.nombre,
+      description,
+      images: [image],
+    },
+  };
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
@@ -31,8 +68,31 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     ? product.precio * (1 - product.descuento / 100)
     : product.precio;
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.nombre,
+    description: product.descripcion || product.nombre,
+    image: product.images?.length ? product.images : [product.imagen].filter(Boolean),
+    sku: product.id,
+    category: product.categoria,
+    brand: { "@type": "Brand", name: "Valm Beauty" },
+    offers: {
+      "@type": "Offer",
+      url: `/catalogo/${product.id}`,
+      priceCurrency: "COP",
+      price: discountedPrice.toFixed(0),
+      availability: "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
