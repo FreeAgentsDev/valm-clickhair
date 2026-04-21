@@ -4,6 +4,10 @@ import { getProducts, bulkUpdateWeights } from "@/lib/db";
 
 /** GET - Listar productos con peso para asignación masiva */
 export async function GET() {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
   try {
     const products = await getProducts();
     return NextResponse.json({

@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import CartToast from "@/components/CartToast";
 import PopupAnnouncement from "@/components/PopupAnnouncement";
+import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
 import DataInitializer from "@/components/admin/DataInitializer";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -149,6 +150,7 @@ export default function RootLayout({
           <PopupAnnouncement />
           <CartToast />
           {children}
+          <WhatsAppFloatingButton />
         </CartProvider>
       </body>
     </html>

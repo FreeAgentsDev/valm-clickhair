@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getOrderById } from "@/lib/orders";
 
 /**
  * API ADDI - Compra ahora, paga después
@@ -51,18 +52,8 @@ async function getAddiToken(): Promise<string> {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      orderId,
-      totalAmount,
-      shippingAmount,
-      items,
-      client,
-      shippingAddress,
-    } = body as {
+    const { orderId, client, shippingAddress } = body as {
       orderId: string;
-      totalAmount: number;
-      shippingAmount: number;
-      items: { sku?: string; name: string; quantity: number; unitPrice: number; pictureUrl?: string; category?: string }[];
       client: { firstName: string; lastName: string; email: string; cellphone: string; idType?: string; idNumber?: string };
       shippingAddress?: { lineOne: string; city: string; state: string; country?: string };
     };
@@ -74,18 +65,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!orderId || !totalAmount || !client?.email) {
+    if (!orderId || !client?.email) {
       return NextResponse.json(
-        { error: "Datos incompletos: orderId, totalAmount y client.email son requeridos" },
+        { error: "Datos incompletos: orderId y client.email son requeridos" },
         { status: 400 }
       );
     }
+
+    // Cargar la orden autoritativa desde BD (nunca confiar en precios del cliente)
+    const order = getOrderById(orderId);
+    if (!order) {
+      return NextResponse.json(
+        { error: "Orden no encontrada. Guarda la orden antes de llamar a ADDI." },
+        { status: 404 }
+      );
+    }
+
+    const totalAmount = order.total;
+    const shippingAmount = order.shippingCost;
+    const items = order.items.map((it, i) => ({
+      sku: `SKU-${orderId}-${i}`,
+      name: it.product.name,
+      quantity: it.quantity,
+      unitPrice: it.product.price,
+      pictureUrl: it.product.image,
+      category: it.product.category || "General",
+    }));
 
     // 1. Obtener token
     const token = await getAddiToken();
 
     // 2. Crear aplicación de crédito (POST /v1/online-applications)
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
+
+    // Incluimos el secret en el callbackUrl para que, cuando ADDI nos llame,
+    // podamos verificar que la petición viene del flujo que nosotros iniciamos.
+    const callbackSecret = process.env.ADDI_CALLBACK_SECRET;
+    const callbackUrl = callbackSecret
+      ? `${baseUrl}/api/addi/callback?secret=${encodeURIComponent(callbackSecret)}`
+      : `${baseUrl}/api/addi/callback`;
 
     // Según spec: totalAmount y shippingAmount son strings con decimales
     const applicationBody = {
@@ -119,7 +137,7 @@ export async function POST(request: NextRequest) {
       }),
       allyUrlRedirection: {
         logoUrl: `${baseUrl}/logos/logo.png`,
-        callbackUrl: `${baseUrl}/api/addi/callback`,
+        callbackUrl,
         redirectionUrl: `${baseUrl}/checkout/success?ref=${orderId}&payment=addi`,
       },
     };

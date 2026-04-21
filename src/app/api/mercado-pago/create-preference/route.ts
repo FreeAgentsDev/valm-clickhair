@@ -1,24 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Preference } from "mercadopago";
+import { getOrderById } from "@/lib/orders";
 
 /**
  * API para crear preferencia de pago en Mercado Pago (Sandbox/Producción)
  * Documentación: https://www.mercadopago.com.co/developers/es/docs/checkout-pro
  * Requiere: MERCADO_PAGO_ACCESS_TOKEN en .env
+ *
+ * IMPORTANTE: usamos los montos AUTORITATIVOS de la orden guardada en BD,
+ * NO confiamos en lo que mande el cliente. Esto previene manipulación de precios.
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { items, payer, reference, redirectUrl } = body;
+    const { payer, reference, redirectUrl } = body;
+
+    if (!reference) {
+      return NextResponse.json(
+        { error: "reference (orderId) requerido" },
+        { status: 400 }
+      );
+    }
+
+    const order = getOrderById(reference);
+    if (!order) {
+      return NextResponse.json(
+        { error: "Orden no encontrada. Guarda la orden antes de crear la preferencia." },
+        { status: 404 }
+      );
+    }
 
     const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
-
     if (!accessToken) {
       return NextResponse.json(
-        {
-          error:
-            "Mercado Pago no configurado. Agrega MERCADO_PAGO_ACCESS_TOKEN en .env",
-        },
+        { error: "Mercado Pago no configurado." },
         { status: 500 }
       );
     }
@@ -30,34 +45,43 @@ export async function POST(request: NextRequest) {
     const successUrl = redirectUrl || `${baseUrl}/checkout/success`;
     const isLocalhost = !baseUrl || baseUrl.includes("localhost");
 
+    // Items desde la orden (precios verificados server-side)
+    const mpItems = order.items.map((item) => ({
+      id: item.product.id,
+      title: item.product.name,
+      quantity: item.quantity,
+      unit_price: item.product.price,
+      currency_id: "COP",
+      ...(item.product.image && { picture_url: item.product.image }),
+    }));
+
+    // Agregar envío como item separado si > 0 (para que el total concuerde)
+    if (order.shippingCost > 0) {
+      mpItems.push({
+        id: "shipping",
+        title: "Envío",
+        quantity: 1,
+        unit_price: order.shippingCost,
+        currency_id: "COP",
+      });
+    }
+
     const preferenceBody: Record<string, unknown> = {
-      items: items.map(
-        (item: {
-          title: string;
-          quantity: number;
-          unit_price: number;
-          picture_url?: string;
-        }) => ({
-          id: item.title,
-          title: item.title,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          currency_id: "COP",
-          ...(item.picture_url && { picture_url: item.picture_url }),
-        })
-      ),
+      items: mpItems,
       payer: payer?.email
         ? {
-            name: payer.name || "Cliente",
-            email: payer.email,
+            name: payer.name || order.shipping.name || "Cliente",
+            email: payer.email || order.shipping.email,
             ...(payer.phone && { phone: { number: payer.phone } }),
           }
-        : undefined,
-      external_reference: reference || `order-${Date.now()}`,
+        : {
+            name: order.shipping.name || "Cliente",
+            email: order.shipping.email,
+          },
+      external_reference: reference,
       statement_descriptor: "VALM BEAUTY",
     };
 
-    // back_urls y auto_return solo con URL pública (MP no acepta localhost)
     if (!isLocalhost) {
       preferenceBody.back_urls = {
         success: successUrl,

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { X, Home, Instagram, ShoppingCart, Lock } from "lucide-react";
+import { X, Home, Instagram, ShoppingCart, Lock, LayoutGrid } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { BRANDS } from "@/lib/brands";
 import type { BrandSlug } from "@/types";
@@ -15,10 +15,6 @@ interface SidebarProps {
   onLinkClick: () => void;
   brand?: BrandSlug;
 }
-
-const BRAND_NAV_LINKS = [
-  { href: "/valm-beauty", label: "Valm Beauty", brand: "valm-beauty" as BrandSlug },
-] as const;
 
 export function Sidebar({ isOpen, isClosing, onClose, onLinkClick, brand }: SidebarProps) {
   const { itemCount } = useCart();
@@ -139,46 +135,18 @@ export function Sidebar({ isOpen, isClosing, onClose, onLinkClick, brand }: Side
                 Inicio
               </Link>
             </li>
-            {BRAND_NAV_LINKS.map((link) => {
-              const isActive = brand === link.brand;
-              const brandData = BRANDS[link.brand];
-              return (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={onLinkClick}
-                    className={`flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3.5 font-semibold transition-colors ${
-                      isActive
-                        ? "text-white"
-                        : "text-gray-800 hover:bg-gray-50 active:bg-gray-100"
-                    }`}
-                    style={
-                      isActive && brandData
-                        ? { backgroundColor: brandData.primaryColor }
-                        : undefined
-                    }
-                  >
-                    <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl"
-                      style={{
-                        backgroundColor: isActive
-                          ? "rgba(255,255,255,0.25)"
-                          : "#FDF2F4",
-                      }}
-                    >
-                      <Image
-                        src={brandData.logo}
-                        alt=""
-                        width={24}
-                        height={24}
-                        className="object-cover"
-                      />
-                    </span>
-                    {link.label}
-                  </Link>
-                </li>
-              );
-            })}
+            <li>
+              <Link
+                href="/catalogo"
+                onClick={onLinkClick}
+                className="flex min-h-[48px] items-center gap-3 rounded-xl px-4 py-3.5 font-medium text-gray-800 transition-colors hover:bg-gray-50 active:bg-gray-100"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-700">
+                  <LayoutGrid size={20} strokeWidth={2.5} aria-hidden />
+                </span>
+                Catálogo
+              </Link>
+            </li>
             {currentBrand && (
               <li>
                 <a

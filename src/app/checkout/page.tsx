@@ -99,8 +99,8 @@ export default function CheckoutPage() {
       const orderTotal = total + shippingCost;
       const reference = `ORD-${Date.now()}`;
 
-      // Guardar orden en el servidor
-      await fetch("/api/orders", {
+      // Guardar orden en el servidor (el servidor re-calcula subtotal/envío/total)
+      const orderRes = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -110,6 +110,7 @@ export default function CheckoutPage() {
             quantity: item.quantity,
           })),
           shipping: address,
+          barrio: isManizales ? selectedBarrio : undefined,
           subtotal: total,
           shippingCost,
           total: orderTotal,
@@ -119,6 +120,12 @@ export default function CheckoutPage() {
           },
         }),
       });
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        throw new Error(orderData.error || "Error creando la orden");
+      }
+      // El servidor re-calculó y guardó la orden con precios autoritativos.
+      // Las APIs de pago (MP/ADDI) leen de la orden guardada, no del cliente.
 
       if (paymentMethod === "mercado-pago") {
         const res = await fetch("/api/mercado-pago/create-preference", {

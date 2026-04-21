@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { updateOrderStatus } from "@/lib/orders";
+import { getOrderById, updateOrderStatus } from "@/lib/orders";
 
 /**
  * Webhook de Mercado Pago - Recibe notificaciones de pago
@@ -12,14 +12,22 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-signature");
     const requestId = request.headers.get("x-request-id");
 
-    // Verificar firma si tenemos el secret configurado
+    // Verificación de firma OBLIGATORIA: sin secret o sin firma, se rechaza.
     const webhookSecret = process.env.MERCADO_PAGO_WEBHOOK_SECRET;
-    if (webhookSecret && signature) {
-      const isValid = verifySignature(body, signature, requestId, webhookSecret);
-      if (!isValid) {
-        console.error("Webhook: firma inválida");
-        return NextResponse.json({ error: "Firma inválida" }, { status: 401 });
-      }
+    if (!webhookSecret) {
+      console.error("Webhook MP: MERCADO_PAGO_WEBHOOK_SECRET no configurado");
+      return NextResponse.json(
+        { error: "Webhook no configurado en el servidor" },
+        { status: 500 }
+      );
+    }
+    if (!signature) {
+      console.error("Webhook MP: falta header x-signature");
+      return NextResponse.json({ error: "Firma requerida" }, { status: 401 });
+    }
+    if (!verifySignature(body, signature, requestId, webhookSecret)) {
+      console.error("Webhook MP: firma inválida");
+      return NextResponse.json({ error: "Firma inválida" }, { status: 401 });
     }
 
     const data = JSON.parse(body);
@@ -105,8 +113,9 @@ async function handlePaymentNotification(paymentId: string | undefined) {
     const payment = await response.json();
     const externalRef = payment.external_reference;
     const status = payment.status;
+    const transactionAmount = Number(payment.transaction_amount);
 
-    console.log(`Webhook: Pago ${paymentId} - ref: ${externalRef} - estado: ${status}`);
+    console.log(`Webhook: Pago ${paymentId} - ref: ${externalRef} - estado: ${status} - monto: ${transactionAmount}`);
 
     // Mapear estados de Mercado Pago a estados de orden
     const statusMap: Record<string, "paid" | "pending"> = {
@@ -116,10 +125,34 @@ async function handlePaymentNotification(paymentId: string | undefined) {
     };
 
     const orderStatus = statusMap[status];
-    if (orderStatus && externalRef) {
-      updateOrderStatus(externalRef, orderStatus, paymentId.toString());
-      console.log(`Webhook: Orden ${externalRef} actualizada a ${orderStatus}`);
+    if (!orderStatus || !externalRef) return;
+
+    // Verificar que la orden exista y que el monto coincida (solo si APPROVED)
+    const order = getOrderById(externalRef);
+    if (!order) {
+      console.error(`Webhook: orden ${externalRef} no existe en nuestra BD`);
+      return;
     }
+
+    // Idempotencia: si ya está paga, no re-procesar
+    if (order.status === "paid" && orderStatus === "paid") {
+      console.log(`Webhook: orden ${externalRef} ya estaba paga, ignorando`);
+      return;
+    }
+
+    if (orderStatus === "paid") {
+      // Tolerancia $100 COP para redondeos.
+      const diff = Math.abs(transactionAmount - order.total);
+      if (!Number.isFinite(transactionAmount) || diff > 100) {
+        console.error(
+          `[SECURITY] Webhook: monto pagado ${transactionAmount} no coincide con total ${order.total} (ref ${externalRef}). NO se marca como paga.`
+        );
+        return;
+      }
+    }
+
+    updateOrderStatus(externalRef, orderStatus, paymentId.toString());
+    console.log(`Webhook: Orden ${externalRef} actualizada a ${orderStatus}`);
   } catch (error) {
     console.error("Webhook: error procesando pago:", error);
   }

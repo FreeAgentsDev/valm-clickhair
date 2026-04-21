@@ -5,11 +5,23 @@ const SESSION_COOKIE = "admin_session";
 const SESSION_MAX_AGE = 60 * 60 * 8; // 8 horas
 
 function getSecret(): string {
-  return process.env.ADMIN_SECRET || "valm-default-secret-change-me";
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      "ADMIN_SECRET no está configurado o es demasiado corto (mínimo 32 caracteres)"
+    );
+  }
+  return secret;
 }
 
 function getAdminPassword(): string {
-  return process.env.ADMIN_PASSWORD || "admin123";
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password || password.length < 12) {
+    throw new Error(
+      "ADMIN_PASSWORD no está configurado o es demasiado corto (mínimo 12 caracteres)"
+    );
+  }
+  return password;
 }
 
 /** Crea un token firmado con timestamp */
