@@ -3,7 +3,7 @@ import { isAuthenticated } from "@/lib/auth";
 import { getAdminBrandContent, saveAdminBrandContent } from "@/lib/admin-storage";
 
 export async function GET() {
-  const content = getAdminBrandContent();
+  const content = await getAdminBrandContent();
   return NextResponse.json({ content });
 }
 
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const { content } = await request.json();
-    saveAdminBrandContent(content);
+    await saveAdminBrandContent(content);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Error guardando contenido" }, { status: 500 });

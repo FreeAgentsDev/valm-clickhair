@@ -10,6 +10,6 @@ const DEFAULT_MESSAGES = [
 ];
 
 export async function GET() {
-  const messages = getAdminMarquee() ?? DEFAULT_MESSAGES;
+  const messages = (await getAdminMarquee()) ?? DEFAULT_MESSAGES;
   return NextResponse.json({ messages });
 }

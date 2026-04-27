@@ -1,60 +1,63 @@
-import fs from "fs";
-import path from "path";
+import pool from "./db";
 import type { Product, BrandContent, PopupConfig } from "@/types";
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-
-function ensureDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
+let tableEnsured = false;
+async function ensureSiteContentTable() {
+  if (tableEnsured) return;
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS site_content (
+      key TEXT PRIMARY KEY,
+      value JSONB NOT NULL,
+      updated_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+  tableEnsured = true;
 }
 
-function readJson<T>(filename: string, fallback: T): T {
-  ensureDir();
-  const file = path.join(DATA_DIR, filename);
-  if (!fs.existsSync(file)) return fallback;
-  try {
-    return JSON.parse(fs.readFileSync(file, "utf-8"));
-  } catch {
-    return fallback;
-  }
+async function readKey<T>(key: string): Promise<T | null> {
+  await ensureSiteContentTable();
+  const { rows } = await pool.query<{ value: T }>(
+    `SELECT value FROM site_content WHERE key = $1 LIMIT 1`,
+    [key]
+  );
+  return rows.length ? rows[0].value : null;
 }
 
-function writeJson<T>(filename: string, data: T) {
-  ensureDir();
-  fs.writeFileSync(
-    path.join(DATA_DIR, filename),
-    JSON.stringify(data, null, 2),
-    "utf-8"
+async function writeKey<T>(key: string, value: T): Promise<void> {
+  await ensureSiteContentTable();
+  await pool.query(
+    `INSERT INTO site_content (key, value, updated_at)
+     VALUES ($1, $2::jsonb, NOW())
+     ON CONFLICT (key) DO UPDATE SET value = $2::jsonb, updated_at = NOW()`,
+    [key, JSON.stringify(value)]
   );
 }
 
 // ─── Products ───
-export function getAdminProducts(): Product[] | null {
-  return readJson<Product[] | null>("admin-products.json", null);
+export function getAdminProducts(): Promise<Product[] | null> {
+  return readKey<Product[]>("products");
 }
 
-export function saveAdminProducts(products: Product[]) {
-  writeJson("admin-products.json", products);
+export function saveAdminProducts(products: Product[]): Promise<void> {
+  return writeKey("products", products);
 }
 
 // ─── Brand Content ───
-export function getAdminBrandContent(): BrandContent[] | null {
-  return readJson<BrandContent[] | null>("admin-brand-content.json", null);
+export function getAdminBrandContent(): Promise<BrandContent[] | null> {
+  return readKey<BrandContent[]>("brand-content");
 }
 
-export function saveAdminBrandContent(content: BrandContent[]) {
-  writeJson("admin-brand-content.json", content);
+export function saveAdminBrandContent(content: BrandContent[]): Promise<void> {
+  return writeKey("brand-content", content);
 }
 
 // ─── Popup ───
-export function getAdminPopup(): PopupConfig | null {
-  return readJson<PopupConfig | null>("admin-popup.json", null);
+export function getAdminPopup(): Promise<PopupConfig | null> {
+  return readKey<PopupConfig>("popup");
 }
 
-export function saveAdminPopup(config: PopupConfig) {
-  writeJson("admin-popup.json", config);
+export function saveAdminPopup(config: PopupConfig): Promise<void> {
+  return writeKey("popup", config);
 }
 
 // ─── Hero Content ───
@@ -72,12 +75,12 @@ export interface HeroContent {
   categoriesTitle: string;
 }
 
-export function getAdminHero(): HeroContent | null {
-  return readJson<HeroContent | null>("admin-hero.json", null);
+export function getAdminHero(): Promise<HeroContent | null> {
+  return readKey<HeroContent>("hero");
 }
 
-export function saveAdminHero(content: HeroContent) {
-  writeJson("admin-hero.json", content);
+export function saveAdminHero(content: HeroContent): Promise<void> {
+  return writeKey("hero", content);
 }
 
 // ─── Testimonials ───
@@ -88,19 +91,19 @@ export interface Testimonial {
   stars: number;
 }
 
-export function getAdminTestimonials(): Testimonial[] | null {
-  return readJson<Testimonial[] | null>("admin-testimonials.json", null);
+export function getAdminTestimonials(): Promise<Testimonial[] | null> {
+  return readKey<Testimonial[]>("testimonials");
 }
 
-export function saveAdminTestimonials(testimonials: Testimonial[]) {
-  writeJson("admin-testimonials.json", testimonials);
+export function saveAdminTestimonials(testimonials: Testimonial[]): Promise<void> {
+  return writeKey("testimonials", testimonials);
 }
 
 // ─── Marquee ───
-export function getAdminMarquee(): string[] | null {
-  return readJson<string[] | null>("admin-marquee.json", null);
+export function getAdminMarquee(): Promise<string[] | null> {
+  return readKey<string[]>("marquee");
 }
 
-export function saveAdminMarquee(messages: string[]) {
-  writeJson("admin-marquee.json", messages);
+export function saveAdminMarquee(messages: string[]): Promise<void> {
+  return writeKey("marquee", messages);
 }
