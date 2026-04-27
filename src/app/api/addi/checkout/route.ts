@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Cargar la orden autoritativa desde BD (nunca confiar en precios del cliente)
-    const order = getOrderById(orderId);
+    const order = await getOrderById(orderId);
     if (!order) {
       return NextResponse.json(
         { error: "Orden no encontrada. Guarda la orden antes de llamar a ADDI." },

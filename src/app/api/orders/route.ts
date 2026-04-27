@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    saveOrder(order);
+    await saveOrder(order);
 
     return NextResponse.json({
       success: true,
@@ -172,6 +172,6 @@ export async function GET() {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const orders = getOrders();
+  const orders = await getOrders();
   return NextResponse.json({ orders });
 }

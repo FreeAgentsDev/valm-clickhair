@@ -17,6 +17,7 @@ export interface DbProduct {
   descuento: number;
   descripcion: string;
   categoria: string;
+  marca: string;
   imagen: string;
   peso_gramos: number;
   created_at: string;
@@ -24,6 +25,11 @@ export interface DbProduct {
 }
 
 export interface DbCategory {
+  id: number;
+  nombre: string;
+}
+
+export interface DbBrand {
   id: number;
   nombre: string;
 }
@@ -103,9 +109,48 @@ export async function getProductsByCategory(category: string): Promise<DbProduct
 
 export async function getCategories(): Promise<DbCategory[]> {
   const { rows } = await pool.query<DbCategory>(
-    `SELECT * FROM categorias ORDER BY id`
+    `SELECT * FROM categorias ORDER BY nombre`
   );
   return rows;
+}
+
+export async function createCategory(nombre: string): Promise<DbCategory> {
+  const trimmed = nombre.trim();
+  if (!trimmed) throw new Error("El nombre de la categoría es requerido");
+  const { rows } = await pool.query<DbCategory>(
+    `INSERT INTO categorias (nombre) VALUES ($1)
+     ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre
+     RETURNING *`,
+    [trimmed]
+  );
+  return rows[0];
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  await pool.query(`DELETE FROM categorias WHERE id = $1`, [id]);
+}
+
+export async function getBrands(): Promise<DbBrand[]> {
+  const { rows } = await pool.query<DbBrand>(
+    `SELECT * FROM marcas ORDER BY nombre`
+  );
+  return rows;
+}
+
+export async function createBrand(nombre: string): Promise<DbBrand> {
+  const trimmed = nombre.trim();
+  if (!trimmed) throw new Error("El nombre de la marca es requerido");
+  const { rows } = await pool.query<DbBrand>(
+    `INSERT INTO marcas (nombre) VALUES ($1)
+     ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre
+     RETURNING *`,
+    [trimmed]
+  );
+  return rows[0];
+}
+
+export async function deleteBrand(id: number): Promise<void> {
+  await pool.query(`DELETE FROM marcas WHERE id = $1`, [id]);
 }
 
 // ─── Write operations ───
@@ -116,6 +161,7 @@ export async function createProduct(data: {
   descuento?: number;
   descripcion: string;
   categoria: string;
+  marca?: string;
   imagen: string;
   peso_gramos?: number;
   images?: string[];
@@ -125,9 +171,9 @@ export async function createProduct(data: {
     await client.query("BEGIN");
     const id = crypto.randomUUID();
     const { rows } = await client.query<DbProduct>(
-      `INSERT INTO products (id, nombre, precio, descuento, descripcion, categoria, imagen, peso_gramos)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [id, data.nombre, data.precio, data.descuento ?? 0, data.descripcion, data.categoria, data.imagen, data.peso_gramos ?? 300]
+      `INSERT INTO products (id, nombre, precio, descuento, descripcion, categoria, marca, imagen, peso_gramos)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [id, data.nombre, data.precio, data.descuento ?? 0, data.descripcion, data.categoria, data.marca ?? "", data.imagen, data.peso_gramos ?? 300]
     );
 
     if (data.images?.length) {
@@ -157,6 +203,7 @@ export async function updateProduct(
     descuento?: number;
     descripcion: string;
     categoria: string;
+    marca?: string;
     imagen: string;
     peso_gramos?: number;
     images?: string[];
@@ -166,9 +213,9 @@ export async function updateProduct(
   try {
     await client.query("BEGIN");
     const { rows } = await client.query<DbProduct>(
-      `UPDATE products SET nombre=$2, precio=$3, descuento=$4, descripcion=$5, categoria=$6, imagen=$7, peso_gramos=COALESCE($8, peso_gramos)
+      `UPDATE products SET nombre=$2, precio=$3, descuento=$4, descripcion=$5, categoria=$6, marca=$7, imagen=$8, peso_gramos=COALESCE($9, peso_gramos)
        WHERE id=$1 RETURNING *`,
-      [id, data.nombre, data.precio, data.descuento ?? 0, data.descripcion, data.categoria, data.imagen, data.peso_gramos ?? null]
+      [id, data.nombre, data.precio, data.descuento ?? 0, data.descripcion, data.categoria, data.marca ?? "", data.imagen, data.peso_gramos ?? null]
     );
 
     if (rows.length === 0) throw new Error("Producto no encontrado");
@@ -400,25 +447,88 @@ export async function deleteCategoryDiscount(id: number): Promise<void> {
   await pool.query(`DELETE FROM category_discounts WHERE id = $1`, [id]);
 }
 
-/** Apply active category discounts to products that have no individual discount */
-export async function applyCategDiscounts(products: DbProduct[]): Promise<DbProduct[]> {
-  const discounts = await getCategoryDiscounts();
-  const discountMap = new Map<string, number>();
-  for (const d of discounts) {
-    if (d.activo && d.descuento > 0) {
-      discountMap.set(d.categoria, d.descuento);
-    }
+// ─── Brand Discounts ───
+
+export interface DbBrandDiscount {
+  id: number;
+  marca: string;
+  descuento: number;
+  activo: boolean;
+  created_at: string;
+}
+
+export async function getBrandDiscounts(): Promise<DbBrandDiscount[]> {
+  const { rows } = await pool.query<DbBrandDiscount>(
+    `SELECT * FROM brand_discounts ORDER BY marca`
+  );
+  return rows.map((r) => ({ ...r, descuento: Number(r.descuento) }));
+}
+
+export async function upsertBrandDiscount(
+  marca: string,
+  descuento: number
+): Promise<DbBrandDiscount> {
+  const { rows } = await pool.query<DbBrandDiscount>(
+    `INSERT INTO brand_discounts (marca, descuento)
+     VALUES ($1, $2)
+     ON CONFLICT (marca) DO UPDATE SET descuento = $2
+     RETURNING *`,
+    [marca, descuento]
+  );
+  return { ...rows[0], descuento: Number(rows[0].descuento) };
+}
+
+export async function updateBrandDiscount(
+  id: number,
+  data: { descuento?: number; activo?: boolean }
+): Promise<DbBrandDiscount> {
+  const { rows } = await pool.query<DbBrandDiscount>(
+    `UPDATE brand_discounts SET
+       descuento = COALESCE($2, descuento),
+       activo = COALESCE($3, activo)
+     WHERE id = $1 RETURNING *`,
+    [id, data.descuento ?? null, data.activo ?? null]
+  );
+  if (rows.length === 0) throw new Error("Descuento de marca no encontrado");
+  return { ...rows[0], descuento: Number(rows[0].descuento) };
+}
+
+export async function deleteBrandDiscount(id: number): Promise<void> {
+  await pool.query(`DELETE FROM brand_discounts WHERE id = $1`, [id]);
+}
+
+/**
+ * Aplica descuentos automáticos a productos sin descuento individual.
+ * Precedencia: descuento individual del producto > max(descuento de marca, descuento de categoría).
+ */
+export async function applyDiscounts(products: DbProduct[]): Promise<DbProduct[]> {
+  const [catDiscounts, brandDiscounts] = await Promise.all([
+    getCategoryDiscounts(),
+    getBrandDiscounts(),
+  ]);
+
+  const catMap = new Map<string, number>();
+  for (const d of catDiscounts) {
+    if (d.activo && d.descuento > 0) catMap.set(d.categoria, d.descuento);
+  }
+
+  const brandMap = new Map<string, number>();
+  for (const d of brandDiscounts) {
+    if (d.activo && d.descuento > 0) brandMap.set(d.marca, d.descuento);
   }
 
   return products.map((p) => {
-    if (p.descuento > 0) return p; // product has its own discount
-    const catDiscount = discountMap.get(p.categoria);
-    if (catDiscount) {
-      return { ...p, descuento: catDiscount };
-    }
+    if (p.descuento > 0) return p; // descuento individual gana
+    const catDisc = catMap.get(p.categoria) ?? 0;
+    const brandDisc = p.marca ? (brandMap.get(p.marca) ?? 0) : 0;
+    const auto = Math.max(catDisc, brandDisc);
+    if (auto > 0) return { ...p, descuento: auto };
     return p;
   });
 }
+
+/** @deprecated Usar applyDiscounts en su lugar (también aplica descuentos por marca). */
+export const applyCategDiscounts = applyDiscounts;
 
 export async function getFeaturedProducts(limit = 4): Promise<DbProduct[]> {
   const { rows } = await pool.query<DbProduct & { imgs: string | null }>(

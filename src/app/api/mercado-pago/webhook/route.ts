@@ -128,7 +128,7 @@ async function handlePaymentNotification(paymentId: string | undefined) {
     if (!orderStatus || !externalRef) return;
 
     // Verificar que la orden exista y que el monto coincida (solo si APPROVED)
-    const order = getOrderById(externalRef);
+    const order = await getOrderById(externalRef);
     if (!order) {
       console.error(`Webhook: orden ${externalRef} no existe en nuestra BD`);
       return;
@@ -151,7 +151,7 @@ async function handlePaymentNotification(paymentId: string | undefined) {
       }
     }
 
-    updateOrderStatus(externalRef, orderStatus, paymentId.toString());
+    await updateOrderStatus(externalRef, orderStatus, paymentId.toString());
     console.log(`Webhook: Orden ${externalRef} actualizada a ${orderStatus}`);
   } catch (error) {
     console.error("Webhook: error procesando pago:", error);

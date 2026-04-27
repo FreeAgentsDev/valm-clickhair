@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const order = getOrderById(reference);
+    const order = await getOrderById(reference);
     if (!order) {
       return NextResponse.json(
         { error: "Orden no encontrada. Guarda la orden antes de crear la preferencia." },

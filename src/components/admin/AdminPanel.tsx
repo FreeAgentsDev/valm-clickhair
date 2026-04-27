@@ -10,10 +10,12 @@ import { useMarquee } from "@/hooks/useMarquee";
 import { useHeroContent } from "@/hooks/useHeroContent";
 import { useShipping } from "@/hooks/useShipping";
 import { useDiscounts } from "@/hooks/useDiscounts";
+import { useBrandDiscounts } from "@/hooks/useBrandDiscounts";
 import { useTestimonials } from "@/hooks/useTestimonials";
 import AdminLayout from "./layout/AdminLayout";
 import ProductEditor from "./editors/ProductEditor";
 import DiscountEditor from "./editors/DiscountEditor";
+import BrandDiscountEditor from "./editors/BrandDiscountEditor";
 
 import PopupEditor from "./editors/PopupEditor";
 import OrdersViewer from "./editors/OrdersViewer";
@@ -29,9 +31,14 @@ export default function AdminPanel() {
   const {
     dbProducts,
     categories,
+    brands,
     addProduct,
     updateProduct,
     removeProduct,
+    addCategory,
+    removeCategory,
+    addBrand,
+    removeBrand,
     loading,
     error,
   } = useAdmin();
@@ -54,6 +61,14 @@ export default function AdminPanel() {
     toggleDiscount,
     removeDiscount,
   } = useDiscounts();
+  const {
+    discounts: brandDiscountsList,
+    brands: brandDiscountBrands,
+    loading: brandDiscountsLoading,
+    upsertDiscount: upsertBrandDiscount,
+    toggleDiscount: toggleBrandDiscount,
+    removeDiscount: removeBrandDiscount,
+  } = useBrandDiscounts();
   const { testimonials, loading: testimonialsLoading, updateTestimonials } = useTestimonials();
   const {
     barrios,
@@ -92,7 +107,7 @@ export default function AdminPanel() {
   const tabs: { id: TabId; label: string; icon: typeof Package; badge?: number }[] = [
     { id: "productos", label: "Productos", icon: Package, badge: dbProducts.length },
     { id: "ordenes", label: "Órdenes", icon: ShoppingBag, badge: orders.length },
-    { id: "descuentos", label: "Descuentos", icon: Percent, badge: categoryDiscounts.filter(d => d.activo).length },
+    { id: "descuentos", label: "Descuentos", icon: Percent, badge: categoryDiscounts.filter(d => d.activo).length + brandDiscountsList.filter(d => d.activo).length },
     { id: "envios", label: "Envíos", icon: Truck, badge: barrios.length },
     { id: "contenido", label: "Contenido", icon: FileText },
     { id: "popup", label: "Popup", icon: Megaphone },
@@ -137,9 +152,14 @@ export default function AdminPanel() {
         <ProductEditor
           products={dbProducts}
           categories={categories}
+          brands={brands}
           onAdd={addProduct}
           onUpdate={updateProduct}
           onDelete={removeProduct}
+          onAddCategory={addCategory}
+          onDeleteCategory={removeCategory}
+          onAddBrand={addBrand}
+          onDeleteBrand={removeBrand}
         />
       )}
 
@@ -155,7 +175,7 @@ export default function AdminPanel() {
       )}
 
       {tab === "descuentos" && (
-        <>
+        <div className="space-y-10">
           {discountsLoading && !categoryDiscounts.length ? (
             <p className="text-gray-500 animate-pulse">Cargando descuentos...</p>
           ) : (
@@ -167,7 +187,19 @@ export default function AdminPanel() {
               onDelete={removeDiscount}
             />
           )}
-        </>
+
+          {brandDiscountsLoading && !brandDiscountsList.length ? (
+            <p className="text-gray-500 animate-pulse">Cargando descuentos de marca...</p>
+          ) : (
+            <BrandDiscountEditor
+              discounts={brandDiscountsList}
+              brands={brandDiscountBrands}
+              onUpsert={upsertBrandDiscount}
+              onToggle={toggleBrandDiscount}
+              onDelete={removeBrandDiscount}
+            />
+          )}
+        </div>
       )}
 
       {tab === "envios" && (

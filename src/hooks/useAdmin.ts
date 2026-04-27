@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { DbProduct, DbCategory } from "@/lib/db";
+import type { DbProduct, DbCategory, DbBrand } from "@/lib/db";
 
 export function useAdmin() {
   const [dbProducts, setDbProducts] = useState<DbProduct[]>([]);
   const [categories, setCategories] = useState<DbCategory[]>([]);
+  const [brands, setBrands] = useState<DbBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,6 +18,7 @@ export function useAdmin() {
       const data = await res.json();
       setDbProducts(data.dbProducts || []);
       setCategories(data.categories || []);
+      setBrands(data.brands || []);
     } catch (err) {
       console.error("Error cargando datos:", err);
       setError(err instanceof Error ? err.message : "Error al cargar");
@@ -116,14 +118,97 @@ export function useAdmin() {
     }
   }, []);
 
+  const addCategory = useCallback(async (nombre: string) => {
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Error creando categoría");
+      const created = result.category as DbCategory;
+      setCategories((prev) => {
+        if (prev.some((c) => c.id === created.id)) return prev;
+        return [...prev, created].sort((a, b) => a.nombre.localeCompare(b.nombre));
+      });
+      return created;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error al crear categoría";
+      setError(msg);
+      throw err;
+    }
+  }, []);
+
+  const removeCategory = useCallback(async (id: number) => {
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/categories?id=${id}`, {
+        method: "DELETE",
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Error eliminando categoría");
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error al eliminar categoría";
+      setError(msg);
+      throw err;
+    }
+  }, []);
+
+  const addBrand = useCallback(async (nombre: string) => {
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/brands", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Error creando marca");
+      const created = result.brand as DbBrand;
+      setBrands((prev) => {
+        if (prev.some((b) => b.id === created.id)) return prev;
+        return [...prev, created].sort((a, b) => a.nombre.localeCompare(b.nombre));
+      });
+      return created;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error al crear marca";
+      setError(msg);
+      throw err;
+    }
+  }, []);
+
+  const removeBrand = useCallback(async (id: number) => {
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/brands?id=${id}`, {
+        method: "DELETE",
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Error eliminando marca");
+      setBrands((prev) => prev.filter((b) => b.id !== id));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error al eliminar marca";
+      setError(msg);
+      throw err;
+    }
+  }, []);
+
   return {
     dbProducts,
     categories,
+    brands,
     loading,
     error,
     refreshData,
     addProduct,
     updateProduct,
     removeProduct,
+    addCategory,
+    removeCategory,
+    addBrand,
+    removeBrand,
   };
 }

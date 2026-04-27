@@ -6,7 +6,8 @@ export async function GET() {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
-  return NextResponse.json({ orders: getOrders() });
+  const orders = await getOrders();
+  return NextResponse.json({ orders });
 }
 
 export async function PATCH(request: NextRequest) {
@@ -20,7 +21,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "ID y estado requeridos" }, { status: 400 });
     }
 
-    const order = updateOrderStatus(id, status);
+    const order = await updateOrderStatus(id, status);
     if (!order) {
       return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
     }
@@ -43,7 +44,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "ID requerido" }, { status: 400 });
     }
 
-    const deleted = deleteOrder(id);
+    const deleted = await deleteOrder(id);
     if (!deleted) {
       return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
     }

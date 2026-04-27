@@ -1,49 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import { Percent, Plus, Trash2, ToggleLeft, ToggleRight, Save, Loader2 } from "lucide-react";
-import type { DbCategoryDiscount, DbCategory } from "@/lib/db";
+import { Tag, Plus, Trash2, ToggleLeft, ToggleRight, Save, Loader2 } from "lucide-react";
+import type { DbBrandDiscount, DbBrand } from "@/lib/db";
 
-interface DiscountEditorProps {
-  discounts: DbCategoryDiscount[];
-  categories: DbCategory[];
-  onUpsert: (categoria: string, descuento: number) => Promise<DbCategoryDiscount>;
-  onToggle: (id: number, activo: boolean) => Promise<DbCategoryDiscount>;
+interface BrandDiscountEditorProps {
+  discounts: DbBrandDiscount[];
+  brands: DbBrand[];
+  onUpsert: (marca: string, descuento: number) => Promise<DbBrandDiscount>;
+  onToggle: (id: number, activo: boolean) => Promise<DbBrandDiscount>;
   onDelete: (id: number) => Promise<void>;
 }
 
-export default function DiscountEditor({
+export default function BrandDiscountEditor({
   discounts,
-  categories,
+  brands,
   onUpsert,
   onToggle,
   onDelete,
-}: DiscountEditorProps) {
-  const [newCategoria, setNewCategoria] = useState("");
+}: BrandDiscountEditorProps) {
+  const [newMarca, setNewMarca] = useState("");
   const [newDescuento, setNewDescuento] = useState<number>(0);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [togglingId, setTogglingId] = useState<number | null>(null);
 
-  // Get all unique category names (from DB categories + existing discounts)
-  const allCategories = Array.from(
+  const allBrands = Array.from(
     new Set([
-      ...categories.map((c) => c.nombre),
-      ...discounts.map((d) => d.categoria),
+      ...brands.map((b) => b.nombre),
+      ...discounts.map((d) => d.marca),
     ])
   ).filter(Boolean);
 
-  // Categories that don't have a discount yet
-  const availableCategories = allCategories.filter(
-    (c) => !discounts.some((d) => d.categoria === c)
+  const availableBrands = allBrands.filter(
+    (b) => !discounts.some((d) => d.marca === b)
   );
 
   const handleAdd = async () => {
-    if (!newCategoria.trim() || newDescuento <= 0 || newDescuento > 100) return;
+    if (!newMarca.trim() || newDescuento <= 0 || newDescuento > 100) return;
     setSaving(true);
     try {
-      await onUpsert(newCategoria.trim(), newDescuento);
-      setNewCategoria("");
+      await onUpsert(newMarca.trim(), newDescuento);
+      setNewMarca("");
       setNewDescuento(0);
     } catch {
       // handled by parent
@@ -52,7 +50,7 @@ export default function DiscountEditor({
     }
   };
 
-  const handleToggle = async (d: DbCategoryDiscount) => {
+  const handleToggle = async (d: DbBrandDiscount) => {
     setTogglingId(d.id);
     try {
       await onToggle(d.id, !d.activo);
@@ -63,8 +61,8 @@ export default function DiscountEditor({
     }
   };
 
-  const handleDelete = async (d: DbCategoryDiscount) => {
-    if (!confirm(`¿Eliminar el descuento de "${d.categoria}"?`)) return;
+  const handleDelete = async (d: DbBrandDiscount) => {
+    if (!confirm(`¿Eliminar el descuento de "${d.marca}"?`)) return;
     setDeletingId(d.id);
     try {
       await onDelete(d.id);
@@ -80,12 +78,12 @@ export default function DiscountEditor({
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D62839]/10">
-          <Percent size={20} className="text-[#D62839]" />
+          <Tag size={20} className="text-[#D62839]" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-gray-900">Descuentos por Categoría</h3>
+          <h3 className="text-lg font-bold text-gray-900">Descuentos por Marca</h3>
           <p className="text-sm text-gray-500">
-            Aplica un porcentaje de descuento a todos los productos de una categoría
+            Aplica un porcentaje de descuento a todos los productos de una marca
           </p>
         </div>
       </div>
@@ -97,22 +95,22 @@ export default function DiscountEditor({
         </h4>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-600 mb-1">Categoría</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Marca</label>
             <select
-              value={newCategoria}
-              onChange={(e) => setNewCategoria(e.target.value)}
+              value={newMarca}
+              onChange={(e) => setNewMarca(e.target.value)}
               className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-[#D62839] focus:outline-none"
             >
-              <option value="">— Selecciona una categoría —</option>
-              {availableCategories.map((c) => (
-                <option key={c} value={c}>{c}</option>
+              <option value="">— Selecciona una marca —</option>
+              {availableBrands.map((b) => (
+                <option key={b} value={b}>{b}</option>
               ))}
             </select>
-            {availableCategories.length === 0 && allCategories.length > 0 && (
-              <p className="mt-1 text-[11px] text-gray-400">Todas las categorías ya tienen un descuento. Crea nuevas categorías en la pestaña Productos.</p>
+            {availableBrands.length === 0 && brands.length > 0 && (
+              <p className="mt-1 text-[11px] text-gray-400">Todas las marcas ya tienen un descuento. Crea nuevas marcas en la pestaña Productos.</p>
             )}
-            {allCategories.length === 0 && (
-              <p className="mt-1 text-[11px] text-gray-400">No hay categorías creadas. Agrega categorías desde la pestaña Productos.</p>
+            {brands.length === 0 && (
+              <p className="mt-1 text-[11px] text-gray-400">No hay marcas creadas. Agrega marcas desde la pestaña Productos.</p>
             )}
           </div>
           <div className="w-full sm:w-32">
@@ -130,7 +128,7 @@ export default function DiscountEditor({
           <div className="flex items-end">
             <button
               onClick={handleAdd}
-              disabled={saving || !newCategoria.trim() || newDescuento <= 0}
+              disabled={saving || !newMarca.trim() || newDescuento <= 0}
               className="flex items-center gap-2 rounded-xl bg-[#D62839] px-5 py-2.5 text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-50"
             >
               {saving ? (
@@ -154,8 +152,8 @@ export default function DiscountEditor({
 
         {discounts.length === 0 ? (
           <div className="py-12 text-center">
-            <Percent size={36} className="mx-auto mb-3 text-gray-300" />
-            <p className="text-sm text-gray-400">No hay descuentos por categoría configurados</p>
+            <Tag size={36} className="mx-auto mb-3 text-gray-300" />
+            <p className="text-sm text-gray-400">No hay descuentos por marca configurados</p>
             <p className="text-xs text-gray-300 mt-1">Agrega uno arriba para comenzar</p>
           </div>
         ) : (
@@ -167,9 +165,8 @@ export default function DiscountEditor({
                   d.activo ? "bg-white" : "bg-gray-50 opacity-60"
                 }`}
               >
-                {/* Category name */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate">{d.categoria}</p>
+                  <p className="font-semibold text-gray-900 truncate">{d.marca}</p>
                   <p className="text-xs text-gray-400">
                     {d.activo ? "Activo" : "Inactivo"} · Creado{" "}
                     {d.created_at
@@ -178,7 +175,6 @@ export default function DiscountEditor({
                   </p>
                 </div>
 
-                {/* Discount badge */}
                 <span
                   className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-bold ${
                     d.activo
@@ -189,7 +185,6 @@ export default function DiscountEditor({
                   -{d.descuento}%
                 </span>
 
-                {/* Toggle active */}
                 <button
                   onClick={() => handleToggle(d)}
                   disabled={togglingId === d.id}
@@ -205,7 +200,6 @@ export default function DiscountEditor({
                   )}
                 </button>
 
-                {/* Delete */}
                 <button
                   onClick={() => handleDelete(d)}
                   disabled={deletingId === d.id}
@@ -228,8 +222,9 @@ export default function DiscountEditor({
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
         <p className="font-medium mb-1">¿Cómo funciona?</p>
         <ul className="list-disc list-inside space-y-1 text-xs text-amber-700">
-          <li>El descuento se aplica automáticamente a todos los productos de la categoría seleccionada</li>
+          <li>El descuento se aplica automáticamente a todos los productos de la marca seleccionada</li>
           <li>Si un producto ya tiene un descuento individual, se mantiene el del producto</li>
+          <li>Si una marca y una categoría tienen descuento simultáneo, gana el mayor</li>
           <li>Puedes activar/desactivar descuentos sin eliminarlos</li>
         </ul>
       </div>

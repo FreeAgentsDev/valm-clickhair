@@ -2,15 +2,20 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { Search, Database, Plus, Save, Trash2, X, Upload, Loader2 } from "lucide-react";
-import type { DbProduct, DbCategory } from "@/lib/db";
+import { Search, Database, Plus, Save, Trash2, X, Upload, Loader2, Check } from "lucide-react";
+import type { DbProduct, DbCategory, DbBrand } from "@/lib/db";
 
 interface ProductEditorProps {
   products: DbProduct[];
   categories: DbCategory[];
+  brands: DbBrand[];
   onAdd: (data: ProductFormData) => Promise<DbProduct>;
   onUpdate: (id: string, data: ProductFormData) => Promise<DbProduct>;
   onDelete: (id: string) => Promise<void>;
+  onAddCategory: (nombre: string) => Promise<DbCategory>;
+  onDeleteCategory: (id: number) => Promise<void>;
+  onAddBrand: (nombre: string) => Promise<DbBrand>;
+  onDeleteBrand: (id: number) => Promise<void>;
 }
 
 interface ProductFormData {
@@ -19,31 +24,45 @@ interface ProductFormData {
   descuento: number;
   descripcion: string;
   categoria: string;
+  marca: string;
   imagen: string;
   peso_gramos?: number;
   images?: string[];
 }
 
 function emptyForm(): ProductFormData {
-  return { nombre: "", precio: 0, descuento: 0, descripcion: "", categoria: "", imagen: "", peso_gramos: 300, images: [] };
+  return { nombre: "", precio: 0, descuento: 0, descripcion: "", categoria: "", marca: "", imagen: "", peso_gramos: 300, images: [] };
 }
 
 export default function ProductEditor({
   products,
   categories,
+  brands,
   onAdd,
   onUpdate,
   onDelete,
+  onAddCategory,
+  onDeleteCategory,
+  onAddBrand,
+  onDeleteBrand,
 }: ProductEditorProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<ProductFormData | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [brandFilter, setBrandFilter] = useState("all");
   const [showMobileEditor, setShowMobileEditor] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [savingCategory, setSavingCategory] = useState(false);
+  const [creatingBrand, setCreatingBrand] = useState(false);
+  const [newBrandName, setNewBrandName] = useState("");
+  const [savingBrand, setSavingBrand] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const imagesRef = useRef<HTMLInputElement>(null);
 
   const uploadFiles = async (files: FileList, folder = "products"): Promise<string[]> => {
@@ -59,14 +78,26 @@ export default function ProductEditor({
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(price);
 
-  const uniqueCategories = Array.from(
-    new Set([...categories.map((c) => c.nombre), ...products.map((p) => p.categoria)])
-  ).filter(Boolean);
+  const categoryNames = categories.map((c) => c.nombre);
+  const brandNames = brands.map((b) => b.nombre);
+
+  const sinMarcaCount = products.filter((p) => !p.marca).length;
+  const productsByBrand = new Map<string, number>();
+  for (const p of products) {
+    if (p.marca) productsByBrand.set(p.marca, (productsByBrand.get(p.marca) ?? 0) + 1);
+  }
+  const productsByCategory = new Map<string, number>();
+  for (const p of products) {
+    if (p.categoria) productsByCategory.set(p.categoria, (productsByCategory.get(p.categoria) ?? 0) + 1);
+  }
 
   const filtered = products.filter((p) => {
-    const matchesSearch = !searchTerm || `${p.nombre} ${p.descripcion} ${p.categoria}`.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = !searchTerm || `${p.nombre} ${p.descripcion} ${p.categoria} ${p.marca ?? ""}`.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCat = categoryFilter === "all" || p.categoria === categoryFilter;
-    return matchesSearch && matchesCat;
+    const matchesBrand =
+      brandFilter === "all" ||
+      (brandFilter === "__none__" ? !p.marca : (p.marca ?? "") === brandFilter);
+    return matchesSearch && matchesCat && matchesBrand;
   });
 
   const handleSelect = (p: DbProduct) => {
@@ -78,6 +109,7 @@ export default function ProductEditor({
       descuento: p.descuento,
       descripcion: p.descripcion,
       categoria: p.categoria,
+      marca: p.marca ?? "",
       imagen: allImages[0] || "",
       peso_gramos: p.peso_gramos ?? 300,
       images: allImages,
@@ -97,7 +129,6 @@ export default function ProductEditor({
     if (!form || !form.nombre.trim()) return;
     setSaving(true);
     try {
-      // La primera imagen del array es la portada
       const dataToSave = { ...form, imagen: form.images?.[0] || form.imagen || "" };
       if (isNew) {
         const created = await onAdd(dataToSave);
@@ -126,6 +157,56 @@ export default function ProductEditor({
       // handled by hook
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleQuickDelete = async (e: React.MouseEvent, p: DbProduct) => {
+    e.stopPropagation();
+    if (!confirm(`¿Eliminar "${p.nombre}"? Esta acción no se puede deshacer.`)) return;
+    setDeletingId(p.id);
+    try {
+      await onDelete(p.id);
+      if (selectedId === p.id) {
+        setSelectedId(null);
+        setForm(null);
+        setShowMobileEditor(false);
+      }
+    } catch {
+      // handled by hook
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleCreateCategory = async () => {
+    const name = newCategoryName.trim();
+    if (!name || !form) return;
+    setSavingCategory(true);
+    try {
+      const created = await onAddCategory(name);
+      setForm({ ...form, categoria: created.nombre });
+      setNewCategoryName("");
+      setCreatingCategory(false);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error creando categoría");
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
+  const handleCreateBrand = async () => {
+    const name = newBrandName.trim();
+    if (!name || !form) return;
+    setSavingBrand(true);
+    try {
+      const created = await onAddBrand(name);
+      setForm({ ...form, marca: created.nombre });
+      setNewBrandName("");
+      setCreatingBrand(false);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error creando marca");
+    } finally {
+      setSavingBrand(false);
     }
   };
 
@@ -158,31 +239,51 @@ export default function ProductEditor({
           <input type="text" placeholder="Buscar producto..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 py-2 text-sm focus:border-[#D62839] focus:outline-none" />
         </div>
 
-        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="mb-3 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none">
-          <option value="all">Todas las categorías</option>
-          {uniqueCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="mb-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none">
+          <option value="all">Todas las categorías ({products.length})</option>
+          {categoryNames.map((c) => <option key={c} value={c}>{c} ({productsByCategory.get(c) ?? 0})</option>)}
+        </select>
+
+        <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="mb-3 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none">
+          <option value="all">Todas las marcas ({products.length})</option>
+          {sinMarcaCount > 0 && <option value="__none__">Sin marca ({sinMarcaCount})</option>}
+          {brandNames.map((b) => <option key={b} value={b}>{b} ({productsByBrand.get(b) ?? 0})</option>)}
         </select>
 
         <div className="flex-1 overflow-y-auto space-y-2 pr-1">
           {filtered.length === 0 && <div className="py-8 text-center text-sm text-gray-500">Sin resultados</div>}
           {filtered.map((p) => (
-            <button key={p.id} onClick={() => handleSelect(p)} className={`w-full text-left p-3 rounded-xl border transition-all flex gap-3 ${selectedId === p.id ? "border-[#D62839] bg-[#D62839]/10" : "border-gray-200 bg-gray-50 hover:bg-gray-100"}`}>
-              <div className="h-12 w-12 shrink-0 rounded-lg bg-gray-200 overflow-hidden relative">
+            <div
+              key={p.id}
+              className={`group relative w-full p-3 rounded-xl border transition-all flex gap-3 ${selectedId === p.id ? "border-[#D62839] bg-[#D62839]/10" : "border-gray-200 bg-gray-50 hover:bg-gray-100"}`}
+            >
+              <button onClick={() => handleSelect(p)} className="absolute inset-0 rounded-xl" aria-label={`Editar ${p.nombre}`} />
+              <div className="h-12 w-12 shrink-0 rounded-lg bg-gray-200 overflow-hidden relative pointer-events-none">
                 {(p.imagen || p.images?.[0]) ? (
                   <Image src={p.imagen || p.images[0]} alt="" fill className="object-cover" sizes="48px" />
                 ) : (
                   <div className="h-full w-full flex items-center justify-center text-gray-400"><Database size={18} /></div>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 pointer-events-none text-left">
                 <p className={`font-medium text-sm truncate ${selectedId === p.id ? "text-[#D62839]" : "text-gray-900"}`}>{p.nombre}</p>
-                <p className="text-xs text-gray-500 truncate">{p.categoria}</p>
+                <p className="text-xs text-gray-500 truncate">
+                  {p.categoria}{p.marca ? ` · ${p.marca}` : ""}
+                </p>
                 <div className="flex items-center gap-2">
                   <p className="text-xs font-mono text-gray-600">{formatPrice(p.precio)}</p>
                   {p.descuento > 0 && <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 rounded">-{p.descuento}%</span>}
                 </div>
               </div>
-            </button>
+              <button
+                onClick={(e) => handleQuickDelete(e, p)}
+                disabled={deletingId === p.id}
+                className="relative z-10 self-start opacity-60 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity rounded-lg p-1.5 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                title="Eliminar producto"
+              >
+                {deletingId === p.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+              </button>
+            </div>
           ))}
         </div>
       </div>
@@ -195,10 +296,14 @@ export default function ProductEditor({
               <button onClick={() => { setShowMobileEditor(false); setForm(null); setSelectedId(null); }} className="lg:hidden flex items-center gap-2 text-gray-500 hover:text-gray-900 text-xs font-bold uppercase tracking-wider">
                 ← Volver
               </button>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 ml-auto">
                 {!isNew && (
-                  <button onClick={handleDelete} disabled={saving} className="flex items-center gap-1.5 text-xs text-red-600 hover:text-red-700 font-medium disabled:opacity-50">
-                    <Trash2 size={14} /> Eliminar
+                  <button
+                    onClick={handleDelete}
+                    disabled={saving}
+                    className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100 hover:border-red-300 disabled:opacity-50 transition-colors"
+                  >
+                    <Trash2 size={16} /> Eliminar producto
                   </button>
                 )}
               </div>
@@ -291,11 +396,196 @@ export default function ProductEditor({
 
             {/* Categoría */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-              <input type="text" value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} list="categories-list" placeholder="Categoría" className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-[#D62839] focus:outline-none" />
-              <datalist id="categories-list">
-                {uniqueCategories.map((c) => <option key={c} value={c} />)}
-              </datalist>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  Categoría <span className="text-gray-400 font-normal">({categories.length} disponibles)</span>
+                </label>
+                {!creatingCategory && (
+                  <button
+                    type="button"
+                    onClick={() => { setCreatingCategory(true); setNewCategoryName(""); }}
+                    className="flex items-center gap-1 text-xs font-medium text-[#D62839] hover:text-[#b82230]"
+                  >
+                    <Plus size={14} /> Nueva categoría
+                  </button>
+                )}
+              </div>
+
+              {creatingCategory ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    autoFocus
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Nombre de la nueva categoría"
+                    className="flex-1 rounded-lg border border-[#D62839] px-4 py-2.5 text-sm focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { e.preventDefault(); handleCreateCategory(); }
+                      if (e.key === "Escape") { setCreatingCategory(false); setNewCategoryName(""); }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    disabled={!newCategoryName.trim() || savingCategory}
+                    onClick={handleCreateCategory}
+                    className="flex items-center gap-1.5 rounded-lg bg-[#D62839] px-3 py-2 text-sm font-medium text-white hover:bg-[#b82230] disabled:opacity-50"
+                  >
+                    {savingCategory ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                    Crear
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setCreatingCategory(false); setNewCategoryName(""); }}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={form.categoria}
+                  onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-[#D62839] focus:outline-none bg-white"
+                >
+                  <option value="">— Selecciona categoría —</option>
+                  {categoryNames.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {form.categoria && !categoryNames.includes(form.categoria) && (
+                    <option value={form.categoria}>{form.categoria} (sin guardar)</option>
+                  )}
+                </select>
+              )}
+
+              {categories.length > 0 && (
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-700">
+                    Administrar categorías
+                  </summary>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {categories.map((c) => (
+                      <span key={c.id} className="inline-flex items-center gap-1 rounded-full bg-gray-100 pl-3 pr-1 py-1 text-xs text-gray-700">
+                        {c.nombre}
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const used = products.some((p) => p.categoria === c.nombre);
+                            const msg = used
+                              ? `"${c.nombre}" está en uso por algunos productos. ¿Eliminar la categoría de todas formas?`
+                              : `¿Eliminar la categoría "${c.nombre}"?`;
+                            if (!confirm(msg)) return;
+                            try {
+                              await onDeleteCategory(c.id);
+                            } catch (err) {
+                              alert(err instanceof Error ? err.message : "Error");
+                            }
+                          }}
+                          className="rounded-full p-0.5 text-gray-400 hover:bg-red-100 hover:text-red-600"
+                          title={`Eliminar ${c.nombre}`}
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </div>
+
+            {/* Marca */}
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  Marca <span className="text-gray-400 font-normal">({brands.length} disponibles)</span>
+                </label>
+                {!creatingBrand && (
+                  <button
+                    type="button"
+                    onClick={() => { setCreatingBrand(true); setNewBrandName(""); }}
+                    className="flex items-center gap-1 text-xs font-medium text-[#D62839] hover:text-[#b82230]"
+                  >
+                    <Plus size={14} /> Nueva marca
+                  </button>
+                )}
+              </div>
+
+              {creatingBrand ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    autoFocus
+                    value={newBrandName}
+                    onChange={(e) => setNewBrandName(e.target.value)}
+                    placeholder="Nombre de la nueva marca"
+                    className="flex-1 rounded-lg border border-[#D62839] px-4 py-2.5 text-sm focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { e.preventDefault(); handleCreateBrand(); }
+                      if (e.key === "Escape") { setCreatingBrand(false); setNewBrandName(""); }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    disabled={!newBrandName.trim() || savingBrand}
+                    onClick={handleCreateBrand}
+                    className="flex items-center gap-1.5 rounded-lg bg-[#D62839] px-3 py-2 text-sm font-medium text-white hover:bg-[#b82230] disabled:opacity-50"
+                  >
+                    {savingBrand ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                    Crear
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setCreatingBrand(false); setNewBrandName(""); }}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={form.marca}
+                  onChange={(e) => setForm({ ...form, marca: e.target.value })}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-[#D62839] focus:outline-none bg-white"
+                >
+                  <option value="">— Sin marca —</option>
+                  {brandNames.map((b) => <option key={b} value={b}>{b}</option>)}
+                  {form.marca && !brandNames.includes(form.marca) && (
+                    <option value={form.marca}>{form.marca} (sin guardar)</option>
+                  )}
+                </select>
+              )}
+
+              {brands.length > 0 && (
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-700">
+                    Administrar marcas
+                  </summary>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {brands.map((b) => (
+                      <span key={b.id} className="inline-flex items-center gap-1 rounded-full bg-gray-100 pl-3 pr-1 py-1 text-xs text-gray-700">
+                        {b.nombre}
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const used = products.some((p) => p.marca === b.nombre);
+                            const msg = used
+                              ? `"${b.nombre}" está en uso por algunos productos. ¿Eliminar la marca de todas formas?`
+                              : `¿Eliminar la marca "${b.nombre}"?`;
+                            if (!confirm(msg)) return;
+                            try {
+                              await onDeleteBrand(b.id);
+                            } catch (err) {
+                              alert(err instanceof Error ? err.message : "Error");
+                            }
+                          }}
+                          className="rounded-full p-0.5 text-gray-400 hover:bg-red-100 hover:text-red-600"
+                          title={`Eliminar ${b.nombre}`}
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </details>
+              )}
             </div>
 
             {/* ID (solo edición) */}

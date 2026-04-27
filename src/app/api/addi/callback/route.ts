@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Verificar que la orden exista
-    const order = getOrderById(orderId);
+    const order = await getOrderById(orderId);
     if (!order) {
       console.error(`ADDI callback: orden ${orderId} no encontrada`);
       return NextResponse.json(
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    updateOrderStatus(orderId, "paid", applicationId);
+    await updateOrderStatus(orderId, "paid", applicationId);
     console.log(
       `ADDI: Orden ${orderId} APROBADA por ${approvedAmount} COP (appId: ${applicationId})`
     );
