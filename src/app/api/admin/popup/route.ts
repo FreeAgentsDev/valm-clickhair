@@ -3,7 +3,7 @@ import { isAuthenticated } from "@/lib/auth";
 import { getAdminPopup, saveAdminPopup } from "@/lib/admin-storage";
 
 export async function GET() {
-  const config = getAdminPopup();
+  const config = await getAdminPopup();
   return NextResponse.json({ config });
 }
 
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const { config } = await request.json();
-    saveAdminPopup(config);
+    await saveAdminPopup(config);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Error guardando popup" }, { status: 500 });

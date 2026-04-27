@@ -39,7 +39,7 @@ const DEFAULT_HERO = {
 
 export default async function Home() {
   const featuredProducts = await applyCategDiscounts(await getFeaturedProducts(8));
-  const heroContent = getAdminHero() ?? DEFAULT_HERO;
+  const heroContent = (await getAdminHero()) ?? DEFAULT_HERO;
   const hero = { ...DEFAULT_HERO, ...heroContent };
 
   const DEFAULT_TESTIMONIALS = [
@@ -47,7 +47,7 @@ export default async function Home() {
     { name: "Valentina R.", text: "Los exfoliantes Walaky son buenisimos. La atencion por WhatsApp fue super rapida y me asesoraron perfecto.", label: "Clienta verificada", stars: 5 },
     { name: "Laura G.", text: "La mantequilla con glitter es un descubrimiento! Piel suave, brillante y el aroma dura horas.", label: "Clienta verificada", stars: 5 },
   ];
-  const testimonials = getAdminTestimonials() ?? DEFAULT_TESTIMONIALS;
+  const testimonials = (await getAdminTestimonials()) ?? DEFAULT_TESTIMONIALS;
 
   return (
     <div className="min-h-screen bg-white font-sans">

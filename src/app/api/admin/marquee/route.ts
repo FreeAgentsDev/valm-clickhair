@@ -3,7 +3,7 @@ import { isAuthenticated } from "@/lib/auth";
 import { getAdminMarquee, saveAdminMarquee } from "@/lib/admin-storage";
 
 export async function GET() {
-  const messages = getAdminMarquee();
+  const messages = await getAdminMarquee();
   return NextResponse.json({ messages });
 }
 
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     if (!Array.isArray(messages)) {
       return NextResponse.json({ error: "Formato inválido" }, { status: 400 });
     }
-    saveAdminMarquee(messages.filter((m: string) => typeof m === "string" && m.trim()));
+    await saveAdminMarquee(messages.filter((m: string) => typeof m === "string" && m.trim()));
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Error guardando mensajes" }, { status: 500 });
