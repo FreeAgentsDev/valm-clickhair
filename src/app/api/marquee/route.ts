@@ -3,7 +3,7 @@ import { getAdminMarquee } from "@/lib/admin-storage";
 
 const DEFAULT_MESSAGES = [
   "Envíos a todo Colombia",
-  "Pago seguro con Wompi y ADDI",
+  "Pago seguro con Mercado Pago y ADDI",
   "Productos 100% originales",
   "Compra fácil y rápido",
   "Marcas certificadas",

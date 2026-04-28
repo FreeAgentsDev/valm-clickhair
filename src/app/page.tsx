@@ -316,7 +316,7 @@ export default async function Home() {
             </AnimateOnScroll>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { icon: Shield, title: "Pago seguro", desc: "Wompi y ADDI. Tarjeta, PSE, Nequi o cuotas." },
+                { icon: Shield, title: "Pago seguro", desc: "Mercado Pago y ADDI. Tarjeta, PSE, Nequi o cuotas." },
                 { icon: MessageCircle, title: "WhatsApp directo", desc: "Asesoria personalizada y respuesta rapida." },
                 { icon: Truck, title: "Envios nacionales", desc: "A todo Colombia con seguimiento en tiempo real." },
                 { icon: Star, title: "100% Originales", desc: "Marcas premium. Calidad certificada y garantizada." },

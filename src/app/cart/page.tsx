@@ -9,7 +9,7 @@ export default function CartPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Carrito</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Revisa tu pedido y continúa al checkout con Mercado Pago, Wompi o ADDI
+            Revisa tu pedido y continúa al checkout con Mercado Pago o ADDI
           </p>
         </div>
         <CartSummary />
