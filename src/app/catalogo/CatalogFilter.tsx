@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import DbProductCard from "@/components/DbProductCard";
 import type { DbProduct } from "@/lib/db";
@@ -9,11 +9,22 @@ interface CatalogFilterProps {
   products: DbProduct[];
   categories: string[];
   initialCategory?: string;
+  initialSearch?: string;
 }
 
-export default function CatalogFilter({ products, categories, initialCategory }: CatalogFilterProps) {
+export default function CatalogFilter({ products, categories, initialCategory, initialSearch }: CatalogFilterProps) {
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory ?? "todos");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch ?? "");
+
+  // Sincroniza estado local con la URL cuando el usuario navega entre items del navbar
+  // estando ya en /catalogo (Next.js re-renderiza con nuevos props pero useState no se reinicia).
+  useEffect(() => {
+    setSearch(initialSearch ?? "");
+  }, [initialSearch]);
+
+  useEffect(() => {
+    setActiveCategory(initialCategory ?? "todos");
+  }, [initialCategory]);
 
   const filtered = useMemo(() => {
     let result = products;
@@ -21,13 +32,18 @@ export default function CatalogFilter({ products, categories, initialCategory }:
       result = result.filter((p) => p.categoria === activeCategory);
     }
     if (search.trim()) {
-      const q = search.toLowerCase().trim();
-      result = result.filter(
-        (p) =>
-          p.nombre.toLowerCase().includes(q) ||
-          p.descripcion?.toLowerCase().includes(q) ||
-          p.categoria.toLowerCase().includes(q)
-      );
+      // Soporte multi-keyword: separa por coma y hace OR-match
+      const terms = search
+        .toLowerCase()
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      if (terms.length) {
+        result = result.filter((p) => {
+          const haystack = `${p.nombre} ${p.descripcion ?? ""} ${p.categoria} ${p.marca ?? ""}`.toLowerCase();
+          return terms.some((t) => haystack.includes(t));
+        });
+      }
     }
     return result;
   }, [products, activeCategory, search]);
@@ -100,8 +116,8 @@ export default function CatalogFilter({ products, categories, initialCategory }:
         {/* ── Product grid ── */}
         {filtered.length > 0 ? (
           <div className="grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-            {filtered.map((product) => (
-              <DbProductCard key={product.id} product={product} />
+            {filtered.map((product, idx) => (
+              <DbProductCard key={product.id} product={product} index={idx} />
             ))}
           </div>
         ) : (

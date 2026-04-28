@@ -27,11 +27,12 @@ interface ProductFormData {
   marca: string;
   imagen: string;
   peso_gramos?: number;
+  agotado: boolean;
   images?: string[];
 }
 
 function emptyForm(): ProductFormData {
-  return { nombre: "", precio: 0, descuento: 0, descripcion: "", categoria: "", marca: "", imagen: "", peso_gramos: 300, images: [] };
+  return { nombre: "", precio: 0, descuento: 0, descripcion: "", categoria: "", marca: "", imagen: "", peso_gramos: 300, agotado: false, images: [] };
 }
 
 export default function ProductEditor({
@@ -112,6 +113,7 @@ export default function ProductEditor({
       marca: p.marca ?? "",
       imagen: allImages[0] || "",
       peso_gramos: p.peso_gramos ?? 300,
+      agotado: p.agotado ?? false,
       images: allImages,
     });
     setIsNew(false);
@@ -587,6 +589,42 @@ export default function ProductEditor({
                 </details>
               )}
             </div>
+
+            {/* Agotado */}
+            <label
+              className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border-2 p-4 transition-all ${
+                form.agotado
+                  ? "border-[#D62839] bg-[#D62839]/5"
+                  : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+              }`}
+            >
+              <div className="flex flex-col">
+                <span className={`text-sm font-semibold ${form.agotado ? "text-[#D62839]" : "text-gray-700"}`}>
+                  Marcar como agotado
+                </span>
+                <span className="text-xs text-gray-500 mt-0.5">
+                  Se mostrará una banda &quot;Agotado&quot; en la card y se deshabilitará la compra.
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={form.agotado}
+                onChange={(e) => setForm({ ...form, agotado: e.target.checked })}
+                className="sr-only"
+              />
+              <div
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors ${
+                  form.agotado ? "bg-[#D62839]" : "bg-gray-300"
+                }`}
+                aria-hidden
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5 ${
+                    form.agotado ? "translate-x-5" : "translate-x-0.5"
+                  }`}
+                />
+              </div>
+            </label>
 
             {/* ID (solo edición) */}
             {!isNew && selectedId && (

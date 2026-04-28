@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoria?: string }>;
+  searchParams: Promise<{ categoria?: string; q?: string }>;
 }) {
   const [rawProducts, categories, params] = await Promise.all([
     getProducts(),
@@ -33,6 +33,7 @@ export default async function CatalogoPage({
   ]);
   const products = await applyCategDiscounts(rawProducts);
   const initialCategory = params.categoria ?? "todos";
+  const initialSearch = params.q ?? "";
   const categoryNames = categories.map((c) => c.nombre).filter((n) => n !== "todos");
 
   return (
@@ -80,6 +81,7 @@ export default async function CatalogoPage({
           products={products}
           categories={categoryNames}
           initialCategory={initialCategory}
+          initialSearch={initialSearch}
         />
 
         {/* ── CTA bottom ── */}

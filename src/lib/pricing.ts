@@ -111,6 +111,9 @@ export async function recalculateOrder(
     if (!p) {
       throw new Error(`Producto no encontrado: ${it.productId}`);
     }
+    if (p.agotado) {
+      throw new Error(`El producto "${p.nombre}" está agotado y no se puede comprar`);
+    }
     rawProducts.push(p);
   }
 

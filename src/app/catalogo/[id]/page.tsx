@@ -82,10 +82,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       url: `/catalogo/${product.id}`,
       priceCurrency: "COP",
       price: discountedPrice.toFixed(0),
-      availability: "https://schema.org/InStock",
+      availability: product.agotado ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
     },
   };
+
+  const isOutOfStock = product.agotado;
 
   return (
     <div className="min-h-screen bg-white">
@@ -110,9 +112,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
           {/* Info */}
           <div>
-            <span className="inline-block bg-[#FDF2F4] text-[#E93B3C] text-xs font-bold rounded-full px-3 py-1 border border-[#F6BCCB]/40 mb-4">
-              {product.categoria}
-            </span>
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="inline-block bg-[#FDF2F4] text-[#E93B3C] text-xs font-bold rounded-full px-3 py-1 border border-[#F6BCCB]/40">
+                {product.categoria}
+              </span>
+              {isOutOfStock && (
+                <span className="inline-flex items-center rounded-full bg-[#E93B3C] px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-sm">
+                  Agotado
+                </span>
+              )}
+            </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
               {product.nombre}
@@ -123,10 +132,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             )}
 
             <div className="mt-6 flex items-baseline gap-3">
-              <p className="text-3xl font-extrabold text-[#E93B3C]">
+              <p className={`text-3xl font-extrabold ${isOutOfStock ? "text-gray-400 line-through" : "text-[#E93B3C]"}`}>
                 {formatPrice(discountedPrice)}
               </p>
-              {hasDiscount && (
+              {hasDiscount && !isOutOfStock && (
                 <>
                   <p className="text-lg text-gray-400 line-through">{formatPrice(product.precio)}</p>
                   <span className="bg-[#E93B3C] text-white text-xs font-bold px-2.5 py-1 rounded-full">
@@ -138,23 +147,29 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
             {/* CTA */}
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <AddToCartButton
-                product={{
-                  id: String(product.id),
-                  brand: "valm-beauty",
-                  name: product.nombre,
-                  description: product.descripcion || "",
-                  price: discountedPrice,
-                  image: product.images[0] || "/logos/logo.png",
-                  images: product.images,
-                  category: product.categoria,
-                  stock: 99,
-                } satisfies Product}
-              />
+              {isOutOfStock ? (
+                <div className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#F6BCCB] bg-[#FDF2F4] px-6 py-4 text-sm font-bold uppercase tracking-wide text-[#E93B3C]">
+                  Producto agotado
+                </div>
+              ) : (
+                <AddToCartButton
+                  product={{
+                    id: String(product.id),
+                    brand: "valm-beauty",
+                    name: product.nombre,
+                    description: product.descripcion || "",
+                    price: discountedPrice,
+                    image: product.images[0] || "/logos/logo.png",
+                    images: product.images,
+                    category: product.categoria,
+                    stock: 99,
+                  } satisfies Product}
+                />
+              )}
             </div>
 
             {/* ADDI Widget - cuotas */}
-            <AddiWidget price={discountedPrice} />
+            {!isOutOfStock && <AddiWidget price={discountedPrice} />}
 
             {/* Trust */}
             <div className="mt-8 grid grid-cols-2 gap-3">

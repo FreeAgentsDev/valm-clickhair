@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, Sparkles, ArrowRight, MessageCircle, Star, Package } from "lucide-react";
+import { Check, Sparkles, ArrowRight, MessageCircle, Star, Package, MapPin, Clock, Phone } from "lucide-react";
 import type { HeroContent } from "@/lib/admin-storage";
 
 interface HeroContentEditorProps {
@@ -195,6 +195,81 @@ export default function HeroContentEditor({
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Texto</label>
             <textarea value={draft.aboutText} onChange={(e) => setDraft({ ...draft, aboutText: e.target.value })} rows={3} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none resize-none" />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Preview Contacto ── */}
+      <div className="rounded-xl border border-gray-200 overflow-hidden">
+        <p className="px-3 py-1.5 text-[10px] font-medium uppercase text-gray-500 bg-gray-50 border-b border-gray-200">
+          Vista previa de contacto
+        </p>
+        <div className="bg-[#E93B3C] p-5 sm:p-6 text-center">
+          <h3 className="text-lg sm:text-xl font-extrabold text-white">{draft.contactTitle}</h3>
+          <div className="mt-4 grid gap-2.5 sm:grid-cols-2 text-left">
+            <div className="rounded-xl bg-white/10 border border-white/20 p-3">
+              <div className="flex items-center gap-1.5 text-white font-bold text-[10px] tracking-wide uppercase mb-1.5">
+                <MapPin size={11} /> Punto físico
+              </div>
+              <p className="text-white text-[11px] leading-snug">{draft.contactAddress}</p>
+              <p className="mt-1.5 flex items-center gap-1 text-white/85 text-[10px]">
+                <Clock size={10} /> {draft.contactStoreHours}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/10 border border-white/20 p-3">
+              <div className="flex items-center gap-1.5 text-white font-bold text-[10px] tracking-wide uppercase mb-1.5">
+                <MessageCircle size={11} /> WhatsApp
+              </div>
+              <p className="flex items-center gap-1 text-white text-[11px] font-semibold">
+                <Phone size={10} /> {draft.contactWhatsappNumber}
+              </p>
+              <p className="mt-1.5 flex items-center gap-1 text-white/85 text-[10px]">
+                <Clock size={10} /> {draft.contactWhatsappHours}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-center">
+            <span className="inline-flex items-center gap-1 bg-white text-[#E93B3C] px-5 py-1.5 rounded-full text-[10px] font-bold">
+              <MessageCircle size={11} /> {draft.contactCtaText}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Sección contacto */}
+      <div className="border-t border-gray-100 pt-4">
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Contacto / WhatsApp</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-gray-600 mb-1">Título de la sección</label>
+            <input type="text" value={draft.contactTitle} onChange={(e) => setDraft({ ...draft, contactTitle: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none" />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Dirección punto físico</label>
+            <input type="text" value={draft.contactAddress} onChange={(e) => setDraft({ ...draft, contactAddress: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Horario punto físico</label>
+            <input type="text" value={draft.contactStoreHours} onChange={(e) => setDraft({ ...draft, contactStoreHours: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none" />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Número WhatsApp (visible)</label>
+            <input type="text" value={draft.contactWhatsappNumber} onChange={(e) => setDraft({ ...draft, contactWhatsappNumber: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Horario atención WhatsApp</label>
+            <input type="text" value={draft.contactWhatsappHours} onChange={(e) => setDraft({ ...draft, contactWhatsappHours: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none" />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Texto del botón</label>
+            <input type="text" value={draft.contactCtaText} onChange={(e) => setDraft({ ...draft, contactCtaText: e.target.value })} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Enlace WhatsApp (URL)</label>
+            <input type="url" value={draft.contactWhatsappUrl} onChange={(e) => setDraft({ ...draft, contactWhatsappUrl: e.target.value })} placeholder="https://wa.me/573104077106" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#D62839] focus:outline-none" />
           </div>
         </div>
       </div>

@@ -73,6 +73,13 @@ export interface HeroContent {
   catalogTitle: string;
   catalogSubtitle: string;
   categoriesTitle: string;
+  contactTitle: string;
+  contactAddress: string;
+  contactStoreHours: string;
+  contactWhatsappNumber: string;
+  contactWhatsappHours: string;
+  contactCtaText: string;
+  contactWhatsappUrl: string;
 }
 
 export function getAdminHero(): Promise<HeroContent | null> {

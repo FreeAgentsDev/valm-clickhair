@@ -15,6 +15,13 @@ export const DEFAULT_HERO: HeroContent = {
   catalogTitle: "Explora el catalogo",
   catalogSubtitle: "Mas de 170 productos originales para tu belleza y cuidado personal.",
   categoriesTitle: "Encuentra lo que buscas",
+  contactTitle: "Escríbenos por WhatsApp",
+  contactAddress: "Calle 68 # 27-24 Casa Ágape · Barrio Palermo · Manizales",
+  contactStoreHours: "Lunes a Sábado · 10:00am - 7:00pm",
+  contactWhatsappNumber: "310 407 7106",
+  contactWhatsappHours: "Todos los días · 8:00am - 8:00pm",
+  contactCtaText: "Escríbenos ahora",
+  contactWhatsappUrl: "https://wa.me/573104077106",
 };
 
 export function useHeroContent() {

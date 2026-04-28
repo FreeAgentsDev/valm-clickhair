@@ -20,6 +20,7 @@ export interface DbProduct {
   marca: string;
   imagen: string;
   peso_gramos: number;
+  agotado: boolean;
   created_at: string;
   images: string[]; // URLs from product_images (ordered by position)
 }
@@ -164,6 +165,7 @@ export async function createProduct(data: {
   marca?: string;
   imagen: string;
   peso_gramos?: number;
+  agotado?: boolean;
   images?: string[];
 }): Promise<DbProduct> {
   const client = await pool.connect();
@@ -171,9 +173,9 @@ export async function createProduct(data: {
     await client.query("BEGIN");
     const id = crypto.randomUUID();
     const { rows } = await client.query<DbProduct>(
-      `INSERT INTO products (id, nombre, precio, descuento, descripcion, categoria, marca, imagen, peso_gramos)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [id, data.nombre, data.precio, data.descuento ?? 0, data.descripcion, data.categoria, data.marca ?? "", data.imagen, data.peso_gramos ?? 300]
+      `INSERT INTO products (id, nombre, precio, descuento, descripcion, categoria, marca, imagen, peso_gramos, agotado)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [id, data.nombre, data.precio, data.descuento ?? 0, data.descripcion, data.categoria, data.marca ?? "", data.imagen, data.peso_gramos ?? 300, data.agotado ?? false]
     );
 
     if (data.images?.length) {
@@ -206,6 +208,7 @@ export async function updateProduct(
     marca?: string;
     imagen: string;
     peso_gramos?: number;
+    agotado?: boolean;
     images?: string[];
   }
 ): Promise<DbProduct> {
@@ -213,9 +216,9 @@ export async function updateProduct(
   try {
     await client.query("BEGIN");
     const { rows } = await client.query<DbProduct>(
-      `UPDATE products SET nombre=$2, precio=$3, descuento=$4, descripcion=$5, categoria=$6, marca=$7, imagen=$8, peso_gramos=COALESCE($9, peso_gramos)
+      `UPDATE products SET nombre=$2, precio=$3, descuento=$4, descripcion=$5, categoria=$6, marca=$7, imagen=$8, peso_gramos=COALESCE($9, peso_gramos), agotado=$10
        WHERE id=$1 RETURNING *`,
-      [id, data.nombre, data.precio, data.descuento ?? 0, data.descripcion, data.categoria, data.marca ?? "", data.imagen, data.peso_gramos ?? null]
+      [id, data.nombre, data.precio, data.descuento ?? 0, data.descripcion, data.categoria, data.marca ?? "", data.imagen, data.peso_gramos ?? null, data.agotado ?? false]
     );
 
     if (rows.length === 0) throw new Error("Producto no encontrado");

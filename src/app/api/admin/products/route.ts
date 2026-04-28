@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
       marca: (body.marca || "").trim(),
       imagen: (body.imagen || "").trim(),
       peso_gramos: body.peso_gramos != null ? Number(body.peso_gramos) : undefined,
+      agotado: Boolean(body.agotado),
       images: body.images || [],
     });
     return NextResponse.json({ product });
@@ -80,6 +81,7 @@ export async function PUT(request: NextRequest) {
       marca: (body.marca || "").trim(),
       imagen: (body.imagen || "").trim(),
       peso_gramos: body.peso_gramos != null ? Number(body.peso_gramos) : undefined,
+      agotado: Boolean(body.agotado),
       images: body.images || [],
     });
 

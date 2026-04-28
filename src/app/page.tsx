@@ -13,6 +13,9 @@ import {
   Flower2,
   Quote,
   Instagram,
+  MapPin,
+  Clock,
+  Phone,
 } from "lucide-react";
 import { BRANDS } from "@/lib/brands";
 import Header from "@/components/Header";
@@ -35,6 +38,13 @@ const DEFAULT_HERO = {
   catalogTitle: "Explora el catalogo",
   catalogSubtitle: "Mas de 170 productos originales para tu belleza y cuidado personal.",
   categoriesTitle: "Encuentra lo que buscas",
+  contactTitle: "Escríbenos por WhatsApp",
+  contactAddress: "Calle 68 # 27-24 Casa Ágape · Barrio Palermo · Manizales",
+  contactStoreHours: "Lunes a Sábado · 10:00am - 7:00pm",
+  contactWhatsappNumber: "310 407 7106",
+  contactWhatsappHours: "Todos los días · 8:00am - 8:00pm",
+  contactCtaText: "Escríbenos ahora",
+  contactWhatsappUrl: "https://wa.me/573104077106",
 };
 
 export default async function Home() {
@@ -330,16 +340,38 @@ export default async function Home() {
           <section className="relative overflow-hidden bg-[#E93B3C] px-4 py-16 sm:py-20">
             <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
             <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-[#F6BCCB]/20 blur-3xl" />
-            <div className="relative mx-auto max-w-3xl text-center">
+            <div className="relative mx-auto max-w-4xl text-center">
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Escribenos por WhatsApp
+                {hero.contactTitle}
               </h2>
-              <p className="mt-4 text-white/80 text-base sm:text-lg">
-                Cra 23A # 60-11 · Manizales, Caldas · Lun-Vie 9:30am - 6:30pm
-              </p>
-              <div className="mt-8 flex justify-center">
-                <a href="https://wa.me/573104077106" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 bg-white text-[#E93B3C] px-10 py-4 rounded-full font-bold text-base transition-all hover:scale-[1.03] hover:shadow-xl">
-                  <MessageCircle size={20} /> Escribenos ahora
+
+              <div className="mt-10 grid gap-4 sm:grid-cols-2 max-w-3xl mx-auto text-left">
+                <div className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-5 sm:p-6">
+                  <div className="flex items-center gap-2 text-white font-bold text-sm tracking-wide uppercase mb-3">
+                    <MapPin size={16} /> Punto físico
+                  </div>
+                  <p className="text-white text-sm sm:text-base leading-relaxed">{hero.contactAddress}</p>
+                  <p className="mt-3 flex items-center gap-1.5 text-white/85 text-sm">
+                    <Clock size={14} /> {hero.contactStoreHours}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-5 sm:p-6">
+                  <div className="flex items-center gap-2 text-white font-bold text-sm tracking-wide uppercase mb-3">
+                    <MessageCircle size={16} /> WhatsApp
+                  </div>
+                  <p className="flex items-center gap-1.5 text-white text-sm sm:text-base font-semibold">
+                    <Phone size={14} /> {hero.contactWhatsappNumber}
+                  </p>
+                  <p className="mt-3 flex items-center gap-1.5 text-white/85 text-sm">
+                    <Clock size={14} /> {hero.contactWhatsappHours}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-10 flex justify-center">
+                <a href={hero.contactWhatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 bg-white text-[#E93B3C] px-10 py-4 rounded-full font-bold text-base transition-all hover:scale-[1.03] hover:shadow-xl">
+                  <MessageCircle size={20} /> {hero.contactCtaText}
                 </a>
               </div>
             </div>

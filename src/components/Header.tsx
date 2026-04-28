@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Menu, X, Lock, Droplets, Flower2, Sparkles, Heart, Star, Gift, LayoutGrid } from "lucide-react";
+import { ShoppingCart, Menu, X, Lock, Droplets, Flower2, Sparkles, Heart, Gift, LayoutGrid, Flame } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
 import { useSidebar } from "@/hooks/useSidebar";
 import { useCart } from "@/lib/cart-context";
@@ -19,13 +19,13 @@ const DEFAULT_MARQUEE = [
 ];
 
 const CATEGORIES = [
-  { href: "/catalogo", label: "Catalogo", icon: LayoutGrid },
-  { href: "/catalogo?categoria=skincare", label: "Skincare", icon: Droplets },
-  { href: "/catalogo?categoria=capilares", label: "Capilares", icon: Flower2 },
-  { href: "/catalogo?categoria=exfoliantes", label: "Exfoliantes", icon: Sparkles },
-  { href: "/catalogo?categoria=corporales", label: "Corporales", icon: Heart },
-  { href: "/catalogo?categoria=maquillaje", label: "Maquillaje", icon: Star },
-  { href: "/catalogo?categoria=kits", label: "Kits", icon: Gift },
+  { href: "/catalogo", label: "Catálogo", icon: LayoutGrid },
+  { href: "/catalogo/mas-vendido", label: "Más vendido", icon: Flame },
+  { href: "/catalogo?q=kit", label: "Kits", icon: Gift },
+  { href: "/catalogo?q=capilar", label: "Capilar", icon: Flower2 },
+  { href: "/catalogo?q=corporal", label: "Corporal", icon: Heart },
+  { href: "/catalogo?q=skincare", label: "Skincare", icon: Droplets },
+  { href: "/catalogo?q=accesorio", label: "Accesorios", icon: Sparkles },
 ] as const;
 
 interface HeaderProps {
