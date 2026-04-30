@@ -6,8 +6,10 @@ import {
   type DbProduct,
 } from "@/lib/db";
 import { getShippingZone } from "@/lib/shipping-zones";
+import { getAdminConfig, DEFAULT_SITE_CONFIG } from "@/lib/admin-storage";
 
-export const FREE_SHIPPING_THRESHOLD = 200_000;
+/** @deprecated Usa getAdminConfig() para leer el threshold dinámico desde BD. */
+export const FREE_SHIPPING_THRESHOLD = DEFAULT_SITE_CONFIG.freeShippingThreshold;
 const DEFAULT_PRODUCT_WEIGHT_GRAMS = 300;
 
 export interface OrderItemInput {
@@ -137,10 +139,17 @@ export async function recalculateOrder(
   const subtotal = lineItems.reduce((s, l) => s + l.lineTotal, 0);
   const totalWeightGrams = lineItems.reduce((s, l) => s + l.weightGrams * l.quantity, 0);
 
-  // 4. Resolver envío (con free shipping threshold)
+  // 4. Resolver envío. Lee config dinámica desde BD:
+  //    - freeShippingEnabled false → nunca hay envío gratis
+  //    - freeShippingEnabled true + threshold = 0 → todos los envíos gratis
+  //    - freeShippingEnabled true + threshold > 0 → gratis si subtotal >= threshold
+  const config = await getAdminConfig();
+  const qualifiesForFreeShipping =
+    config.freeShippingEnabled && subtotal >= config.freeShippingThreshold;
+
   let shippingCost: number;
   let shippingZone: string;
-  if (subtotal >= FREE_SHIPPING_THRESHOLD) {
+  if (qualifiesForFreeShipping) {
     shippingCost = 0;
     shippingZone = getShippingZone(shipping.city, shipping.department);
   } else {

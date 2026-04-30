@@ -29,14 +29,32 @@ export default function CheckoutPage() {
   });
 
   const isManizales = address.city.toLowerCase().trim() === "manizales";
-  const FREE_SHIPPING_THRESHOLD = 200000;
-  const isFreeShipping = total >= FREE_SHIPPING_THRESHOLD;
+
+  // Config dinámica desde admin (envío gratis enable + threshold)
+  const [freeShippingEnabled, setFreeShippingEnabled] = useState(true);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(200000);
+  useEffect(() => {
+    fetch("/api/admin/config")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.config) {
+          setFreeShippingEnabled(Boolean(d.config.freeShippingEnabled));
+          setFreeShippingThreshold(Number(d.config.freeShippingThreshold) || 0);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const isFreeShipping = freeShippingEnabled && total >= freeShippingThreshold;
+  const freeShippingMessage =
+    freeShippingThreshold === 0
+      ? "¡Envío gratis en todos los pedidos!"
+      : `¡Envío gratis por compras mayores a $${freeShippingThreshold.toLocaleString("es-CO")}!`;
 
   const recalcularEnvio = useCallback(async () => {
-    // Envío gratis para compras >= $200.000
     if (isFreeShipping) {
       setShippingCost(0);
-      setShippingMessage("¡Envío gratis por compras mayores a $200.000!");
+      setShippingMessage(freeShippingMessage);
       return;
     }
 
@@ -77,7 +95,7 @@ export default function CheckoutPage() {
     } finally {
       setLoadingShipping(false);
     }
-  }, [address.city, address.department, isManizales, isFreeShipping, selectedBarrio, totalWeight]);
+  }, [address.city, address.department, isManizales, isFreeShipping, freeShippingMessage, selectedBarrio, totalWeight]);
 
   useEffect(() => {
     recalcularEnvio();
@@ -303,7 +321,7 @@ export default function CheckoutPage() {
                     setSelectedBarrio(barrio.nombre);
                     if (isFreeShipping) {
                       setShippingCost(0);
-                      setShippingMessage("¡Envío gratis por compras mayores a $200.000!");
+                      setShippingMessage(freeShippingMessage);
                     } else {
                       setShippingCost(barrio.precio);
                       setShippingMessage(`Envío local - ${barrio.nombre}`);

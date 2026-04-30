@@ -114,3 +114,24 @@ export function getAdminMarquee(): Promise<string[] | null> {
 export function saveAdminMarquee(messages: string[]): Promise<void> {
   return writeKey("marquee", messages);
 }
+
+// ─── Site Config ───
+export interface SiteConfig {
+  freeShippingEnabled: boolean;
+  freeShippingThreshold: number;
+}
+
+export const DEFAULT_SITE_CONFIG: SiteConfig = {
+  freeShippingEnabled: true,
+  freeShippingThreshold: 200_000,
+};
+
+/** Lee el config aplicando defaults para campos faltantes (forward-compatible). */
+export async function getAdminConfig(): Promise<SiteConfig> {
+  const stored = await readKey<Partial<SiteConfig>>("config");
+  return { ...DEFAULT_SITE_CONFIG, ...(stored ?? {}) };
+}
+
+export function saveAdminConfig(config: SiteConfig): Promise<void> {
+  return writeKey("config", config);
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Package, FileText, Megaphone, ShoppingBag, Truck, Percent } from "lucide-react";
+import { Package, FileText, Megaphone, ShoppingBag, Truck, Percent, Settings } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 
 import { usePopup } from "@/hooks/usePopup";
@@ -12,6 +12,7 @@ import { useShipping } from "@/hooks/useShipping";
 import { useDiscounts } from "@/hooks/useDiscounts";
 import { useBrandDiscounts } from "@/hooks/useBrandDiscounts";
 import { useTestimonials } from "@/hooks/useTestimonials";
+import { useConfig } from "@/hooks/useConfig";
 import AdminLayout from "./layout/AdminLayout";
 import ProductEditor from "./editors/ProductEditor";
 import DiscountEditor from "./editors/DiscountEditor";
@@ -23,8 +24,9 @@ import MarqueeEditor from "./editors/MarqueeEditor";
 import HeroContentEditor from "./editors/HeroContentEditor";
 import TestimonialEditor from "./editors/TestimonialEditor";
 import ShippingEditor from "./editors/ShippingEditor";
+import ConfigEditor from "./editors/ConfigEditor";
 
-type TabId = "productos" | "ordenes" | "descuentos" | "envios" | "contenido" | "popup";
+type TabId = "productos" | "ordenes" | "descuentos" | "envios" | "contenido" | "popup" | "config";
 
 export default function AdminPanel() {
   const [tab, setTab] = useState<TabId>("productos");
@@ -79,6 +81,7 @@ export default function AdminPanel() {
     removeBarrio,
     updateNacional,
   } = useShipping();
+  const { config: siteConfig, loading: configLoading, updateConfig } = useConfig();
 
   const handleLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -111,6 +114,7 @@ export default function AdminPanel() {
     { id: "envios", label: "Envíos", icon: Truck, badge: barrios.length },
     { id: "contenido", label: "Contenido", icon: FileText },
     { id: "popup", label: "Popup", icon: Megaphone },
+    { id: "config", label: "Config", icon: Settings },
   ];
 
   return (
@@ -247,6 +251,14 @@ export default function AdminPanel() {
             <PopupEditor config={popupConfig} onSave={updatePopup} />
           )}
         </>
+      )}
+
+      {tab === "config" && (
+        <ConfigEditor
+          config={siteConfig}
+          loading={configLoading}
+          onSave={updateConfig}
+        />
       )}
     </AdminLayout>
   );
