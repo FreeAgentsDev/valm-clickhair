@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { useCart } from "@/lib/cart-context";
-import { Wallet, Truck, ShoppingBag, MapPin } from "lucide-react";
+import { Wallet, Truck, ShoppingBag, MapPin, AlertCircle, CheckCircle2 } from "lucide-react";
 import type { ShippingAddress } from "@/types";
 import BarrioAutocomplete from "@/components/checkout/BarrioAutocomplete";
 
@@ -16,9 +16,11 @@ export default function CheckoutPage() {
   const [shippingCost, setShippingCost] = useState<number | null>(null);
   const [shippingMessage, setShippingMessage] = useState("");
   const [selectedBarrio, setSelectedBarrio] = useState("");
+  const [showBarrioError, setShowBarrioError] = useState(false);
   const [loadingShipping, setLoadingShipping] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dataConsent, setDataConsent] = useState(false);
+  const barrioFieldRef = useRef<HTMLDivElement>(null);
   const [address, setAddress] = useState<ShippingAddress>({
     name: "",
     email: "",
@@ -310,15 +312,23 @@ export default function CheckoutPage() {
 
             {/* Selector de barrio para Manizales */}
             {isManizales && (
-              <div className="mt-4">
+              <div className="mt-4" ref={barrioFieldRef}>
                 <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-2">
                   <MapPin size={16} />
-                  Barrio
+                  Barrio <span className="text-red-500">*</span>
                 </label>
                 <BarrioAutocomplete
                   selected={selectedBarrio}
+                  error={showBarrioError}
                   onSelect={(barrio) => {
+                    if (!barrio) {
+                      setSelectedBarrio("");
+                      setShippingCost(null);
+                      setShippingMessage("");
+                      return;
+                    }
                     setSelectedBarrio(barrio.nombre);
+                    setShowBarrioError(false);
                     if (isFreeShipping) {
                       setShippingCost(0);
                       setShippingMessage(freeShippingMessage);
@@ -328,6 +338,29 @@ export default function CheckoutPage() {
                     }
                   }}
                 />
+                {selectedBarrio ? (
+                  <div className="mt-2 flex items-start gap-2 rounded-lg bg-green-50 border border-green-200 p-2.5 text-xs text-green-800">
+                    <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
+                    <span>
+                      Barrio seleccionado: <strong>{selectedBarrio}</strong>
+                    </span>
+                  </div>
+                ) : (
+                  <div
+                    className={`mt-2 flex items-start gap-2 rounded-lg border p-2.5 text-xs ${
+                      showBarrioError
+                        ? "bg-red-50 border-red-300 text-red-800"
+                        : "bg-amber-50 border-amber-200 text-amber-800"
+                    }`}
+                  >
+                    <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                    <span>
+                      <strong>Importante:</strong> escribe el nombre de tu barrio y{" "}
+                      <strong>haz clic en la opción que aparece en la lista</strong>. Si no
+                      seleccionas un barrio, el botón de pago no se activará.
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -343,7 +376,7 @@ export default function CheckoutPage() {
               ) : (
                 <p className="text-sm text-gray-500">
                   {isManizales
-                    ? "Selecciona tu barrio para ver el costo de envío"
+                    ? "Selecciona tu barrio de la lista para ver el costo de envío"
                     : address.city && address.department
                       ? "Calculando..."
                       : "Ingresa departamento y ciudad para calcular el envío"}
@@ -451,6 +484,23 @@ export default function CheckoutPage() {
                 obligaciones legales.
               </span>
             </label>
+            {/* Aviso visible cuando falta el barrio (causa común que el botón no se active) */}
+            {isManizales && !selectedBarrio && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBarrioError(true);
+                  barrioFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+                className="mt-4 w-full flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800 text-left hover:bg-red-100 transition-colors"
+              >
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                <span>
+                  <strong>El botón está desactivado porque falta seleccionar tu barrio.</strong>{" "}
+                  Toca aquí para ir al campo del barrio y selecciónalo de la lista.
+                </span>
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading || shippingCost == null || !dataConsent}
@@ -462,13 +512,15 @@ export default function CheckoutPage() {
             >
               {loading
                 ? "Procesando..."
-                : shippingCost == null
-                  ? "Completa los datos de envío"
-                  : !dataConsent
-                    ? "Acepta la política de datos"
-                    : paymentMethod === "mercado-pago"
-                      ? "Pagar con Mercado Pago"
-                      : "Solicitar cuotas ADDI"}
+                : isManizales && !selectedBarrio
+                  ? "Selecciona tu barrio para continuar"
+                  : shippingCost == null
+                    ? "Completa los datos de envío"
+                    : !dataConsent
+                      ? "Acepta la política de datos"
+                      : paymentMethod === "mercado-pago"
+                        ? "Pagar con Mercado Pago"
+                        : "Solicitar cuotas ADDI"}
             </button>
           </section>
         </form>

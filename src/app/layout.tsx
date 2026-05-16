@@ -23,11 +23,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://valm-ecommerce.vercel.app"),
   title: {
-    default: "Valm Beauty | Belleza y Cuidado Personal en Manizales",
+    default: "Valm Beauty | Belleza y Cuidado Personal",
     template: "%s | Valm Beauty",
   },
   description:
-    "Tienda virtual de belleza en Manizales. Skincare, perfumes capilares, exfoliantes, cuidado corporal. Marcas: Walaky, Girly, Olé, Fresa Morada. +100 productos originales. Envíos a todo Colombia.",
+    "Tienda virtual de belleza. Skincare, perfumes capilares, exfoliantes, cuidado corporal. Marcas: Walaky, Girly, Olé, Fresa Morada. +100 productos originales. Envíos a todo Colombia.",
   applicationName: "Valm Beauty",
   keywords: [
     "belleza Manizales",
@@ -66,22 +66,22 @@ export const metadata: Metadata = {
     locale: "es_CO",
     url: "/",
     siteName: "Valm Beauty",
-    title: "Valm Beauty | Belleza y Cuidado Personal en Manizales",
+    title: "Valm Beauty | Belleza y Cuidado Personal",
     description:
-      "Tienda virtual de belleza en Manizales. +100 productos originales. Envíos a todo Colombia.",
+      "Tienda virtual de belleza. +100 productos originales. Envíos a todo Colombia.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Valm Beauty - Belleza y Cuidado Personal en Manizales",
+        alt: "Valm Beauty - Belleza y Cuidado Personal",
         type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Valm Beauty | Belleza en Manizales",
+    title: "Valm Beauty | Belleza y Cuidado Personal",
     description:
       "Tienda virtual de belleza. +100 productos originales con envíos a todo Colombia.",
     images: ["/og-image.png"],
