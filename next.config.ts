@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Servidor mínimo: empaqueta solo lo necesario para producción.
+  // Reduce el RSS del proceso (~682MB -> ~250MB) y por ende el costo en Railway.
+  output: "standalone",
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },

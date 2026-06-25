@@ -4,7 +4,10 @@ import crypto from "crypto";
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
-  max: 10,
+  max: 5,
+  // Cierra conexiones ociosas a los 10s: libera RAM y no deja tráfico de fondo
+  // que impida que el servicio pueda dormir (serverless) en periodos sin ventas.
+  idleTimeoutMillis: 10_000,
 });
 
 export default pool;
